@@ -1,0 +1,14 @@
+SitePulse daily check: 30 Oct 2026 (mobile, lab test)
+Tested 5 pages on 1 sites in 1 min.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+D1CU: 5 tested · 0% pass · median score 58 · median LCP 4.1 s
+
+Slowest pages (time until main content shows):
+1. D1CU /avila-university-arizona/ms-technology-management: 10.7 s (score 58)
+2. D1CU /avila-university: 4.2 s (score 57)
+3. D1CU /anderson-university: 4.1 s (score 47)
+4. D1CU /: 2.7 s (score 63)
+5. D1CU /avila-university-arizona: 2.6 s (score 83)
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41093340898
