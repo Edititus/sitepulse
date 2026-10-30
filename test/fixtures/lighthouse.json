@@ -1,0 +1,291 @@
+{
+ "lighthouseVersion": "13.6.0",
+ "categories": {
+  "performance": {
+   "score": 0.87
+  }
+ },
+ "audits": {
+  "largest-contentful-paint": {
+   "id": "largest-contentful-paint",
+   "title": "Largest Contentful Paint",
+   "description": "Largest Contentful Paint marks the time at which the largest text or image is painted. [Learn more about the Largest Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)",
+   "score": 0.94,
+   "scoreDisplayMode": "numeric",
+   "numericValue": 2228.2982,
+   "numericUnit": "millisecond",
+   "displayValue": "2.2 s",
+   "scoringOptions": {
+    "p10": 2500,
+    "median": 4000
+   }
+  },
+  "cumulative-layout-shift": {
+   "id": "cumulative-layout-shift",
+   "title": "Cumulative Layout Shift",
+   "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport. [Learn more about the Cumulative Layout Shift metric](https://web.dev/articles/cls).",
+   "score": 1,
+   "scoreDisplayMode": "numeric",
+   "numericValue": 0,
+   "numericUnit": "unitless",
+   "displayValue": "0",
+   "scoringOptions": {
+    "p10": 0.1,
+    "median": 0.25
+   },
+   "details": {
+    "type": "debugdata",
+    "items": [
+     {
+      "cumulativeLayoutShiftMainFrame": 0,
+      "newEngineResult": {
+       "cumulativeLayoutShift": 0,
+       "cumulativeLayoutShiftMainFrame": 0
+      },
+      "newEngineResultDiffered": false
+     }
+    ]
+   }
+  },
+  "total-blocking-time": {
+   "id": "total-blocking-time",
+   "title": "Total Blocking Time",
+   "description": "Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds. [Learn more about the Total Blocking Time metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time/).",
+   "score": 1,
+   "scoreDisplayMode": "numeric",
+   "numericValue": 50,
+   "numericUnit": "millisecond",
+   "displayValue": "50 ms",
+   "scoringOptions": {
+    "p10": 200,
+    "median": 600
+   }
+  },
+  "first-contentful-paint": {
+   "id": "first-contentful-paint",
+   "title": "First Contentful Paint",
+   "description": "First Contentful Paint marks the time at which the first text or image is painted. [Learn more about the First Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/).",
+   "score": 0.77,
+   "scoreDisplayMode": "numeric",
+   "numericValue": 2228.2982,
+   "numericUnit": "millisecond",
+   "displayValue": "2.2 s",
+   "scoringOptions": {
+    "p10": 1800,
+    "median": 3000
+   }
+  },
+  "speed-index": {
+   "id": "speed-index",
+   "title": "Speed Index",
+   "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/).",
+   "score": 0.03,
+   "scoreDisplayMode": "numeric",
+   "numericValue": 12386.569479999973,
+   "numericUnit": "millisecond",
+   "displayValue": "12.4 s",
+   "scoringOptions": {
+    "p10": 3387,
+    "median": 5800
+   }
+  },
+  "total-byte-weight": {
+   "id": "total-byte-weight",
+   "title": "Avoids enormous network payloads",
+   "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/).",
+   "score": 1,
+   "scoreDisplayMode": "metricSavings",
+   "numericValue": 1669,
+   "numericUnit": "byte",
+   "displayValue": "Total size was 2 KiB",
+   "details": {
+    "type": "table",
+    "headings": [
+     {
+      "key": "url",
+      "valueType": "url",
+      "label": "URL"
+     },
+     {
+      "key": "totalBytes",
+      "valueType": "bytes",
+      "label": "Transfer Size"
+     }
+    ],
+    "items": [
+     {
+      "url": "http://localhost:8765/favicon.ico",
+      "totalBytes": 521
+     },
+     {
+      "url": "http://localhost:8765/",
+      "totalBytes": 392
+     },
+     {
+      "url": "http://localhost:8765/hero.svg",
+      "totalBytes": 307
+     },
+     {
+      "url": "http://localhost:8765/b.js",
+      "totalBytes": 235
+     },
+     {
+      "url": "http://localhost:8765/a.css",
+      "totalBytes": 214
+     }
+    ],
+    "sortedBy": [
+     "totalBytes"
+    ]
+   },
+   "guidanceLevel": 1
+  },
+  "render-blocking-insight": {
+   "id": "render-blocking-insight",
+   "title": "Render-blocking requests",
+   "description": "Requests are blocking the page’s initial render, which may delay LCP. [Deferring or inlining](https://developer.chrome.com/docs/performance/insights/render-blocking) can move these network requests out of the critical path.",
+   "score": 0,
+   "scoreDisplayMode": "metricSavings",
+   "numericValue": 1336,
+   "numericUnit": "millisecond",
+   "displayValue": "Est savings of 1,340 ms",
+   "metricSavings": {
+    "FCP": 1350,
+    "LCP": 1350
+   },
+   "details": {
+    "type": "table",
+    "headings": [
+     {
+      "key": "url",
+      "valueType": "url",
+      "label": "URL"
+     },
+     {
+      "key": "totalBytes",
+      "valueType": "bytes",
+      "label": "Transfer Size"
+     },
+     {
+      "key": "wastedMs",
+      "valueType": "timespanMs",
+      "label": "Duration"
+     }
+    ],
+    "items": [
+     {
+      "url": "http://localhost:8765/b.js",
+      "totalBytes": 235,
+      "wastedMs": 156
+     },
+     {
+      "url": "http://localhost:8765/a.css",
+      "totalBytes": 214,
+      "wastedMs": 156
+     }
+    ]
+   },
+   "guidanceLevel": 3
+  },
+  "third-parties-insight": {
+   "id": "third-parties-insight",
+   "title": "3rd parties",
+   "description": "3rd party code can significantly impact load performance. [Reduce and defer loading of 3rd party code](https://developer.chrome.com/docs/performance/insights/third-parties) to prioritize your page’s content.",
+   "score": 1,
+   "scoreDisplayMode": "numeric",
+   "details": {
+    "type": "table",
+    "headings": [
+     {
+      "key": "entity",
+      "valueType": "text",
+      "label": "3rd party",
+      "subItemsHeading": {
+       "key": "url",
+       "valueType": "url"
+      }
+     },
+     {
+      "key": "transferSize",
+      "granularity": 1,
+      "valueType": "bytes",
+      "label": "Transfer size",
+      "subItemsHeading": {
+       "key": "transferSize"
+      }
+     },
+     {
+      "key": "mainThreadTime",
+      "granularity": 1,
+      "valueType": "ms",
+      "label": "Main thread time",
+      "subItemsHeading": {
+       "key": "mainThreadTime"
+      }
+     }
+    ],
+    "items": []
+   },
+   "guidanceLevel": 3
+  },
+  "lcp-breakdown-insight": {
+   "id": "lcp-breakdown-insight",
+   "title": "LCP breakdown",
+   "description": "Each [subpart has specific improvement strategies](https://developer.chrome.com/docs/performance/insights/lcp-breakdown). Ideally, most of the LCP time should be spent on loading the resources, not within delays.",
+   "score": 0,
+   "scoreDisplayMode": "numeric",
+   "metricSavings": {
+    "LCP": 0
+   },
+   "details": {
+    "type": "list",
+    "items": [
+     {
+      "type": "table",
+      "headings": [
+       {
+        "key": "label",
+        "valueType": "text",
+        "label": "Subpart"
+       },
+       {
+        "key": "duration",
+        "valueType": "ms",
+        "label": "Duration"
+       }
+      ],
+      "items": [
+       {
+        "subpart": "timeToFirstByte",
+        "label": "Time to first byte",
+        "duration": 41.105
+       },
+       {
+        "subpart": "elementRenderDelay",
+        "label": "Element render delay",
+        "duration": 8168.016
+       }
+      ]
+     },
+     {
+      "type": "node",
+      "lhId": "page-0-H1",
+      "path": "1,HTML,1,BODY,0,H1",
+      "selector": "body > h1",
+      "boundingRect": {
+       "top": 21,
+       "bottom": 58,
+       "left": 8,
+       "right": 972,
+       "width": 964,
+       "height": 37
+      },
+      "snippet": "<h1>",
+      "nodeLabel": "Hello"
+     }
+    ]
+   },
+   "guidanceLevel": 3
+  }
+ }
+}

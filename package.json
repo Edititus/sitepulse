@@ -1,0 +1,20 @@
+{
+  "name": "sitepulse",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SitePulse: daily web performance checks for GoElite websites",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "check": "node src/monitor.ts",
+    "dry-run": "node src/monitor.ts --mode dry-run",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.8.0"
+  }
+}

@@ -1,0 +1,67 @@
+name: SitePulse daily check
+
+on:
+  schedule:
+    - cron: "0 5 * * *" # 05:00 UTC = 06:00 in Lagos, every day
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "daily = today's pages, full = every page, dry-run = list pages only"
+        type: choice
+        options: [daily, full, dry-run]
+        default: daily
+      site:
+        description: "Only these sites, e.g. D1CU or D1CU,VD (blank = all)"
+        required: false
+        default: ""
+      limit:
+        description: "Max pages per site (0 = no limit)"
+        required: false
+        default: "0"
+      notify:
+        description: "Send the summary to Lark"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write # lets the run save its results into data/runs
+
+concurrency:
+  group: sitepulse
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run SitePulse
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL }}
+        run: >
+          node src/monitor.ts
+          --mode "${{ inputs.mode || 'daily' }}"
+          --site "${{ inputs.site || '' }}"
+          --limit "${{ inputs.limit || '0' }}"
+          --notify "${{ github.event_name == 'schedule' || inputs.notify }}"
+
+      - name: Save results to the repository
+        if: always() && (inputs.mode || 'daily') != 'dry-run'
+        run: |
+          git config user.name "sitepulse-bot"
+          git config user.email "sitepulse-bot@users.noreply.github.com"
+          git add data/runs
+          if git diff --cached --quiet; then
+            echo "No new results to save."
+            exit 0
+          fi
+          git commit -m "data: SitePulse run ${{ github.run_id }}"
+          git pull --rebase
+          git push

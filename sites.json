@@ -1,0 +1,58 @@
+{
+  "strategies": ["mobile"],
+  "rate_per_minute": 25,
+  "concurrency": 8,
+  "rotation_days": 7,
+  "samples_per_template": 2,
+  "template_min_pages": 5,
+  "thresholds": {
+    "lcp_ms": 2500,
+    "cls": 0.1,
+    "tbt_ms": 200,
+    "inp_ms": 200
+  },
+  "sites": [
+    {
+      "code": "GE",
+      "name": "GoElite",
+      "url": "https://goelite.com",
+      "sitemap": "https://goelite.com/sitemap.xml",
+      "exclude": ["^/zh(/|$)"]
+    },
+    {
+      "code": "ORG",
+      "name": "Day1CPT.org",
+      "url": "https://day1cpt.org",
+      "sitemap": "https://day1cpt.org/sitemap.xml",
+      "exclude": []
+    },
+    {
+      "code": "D1CU",
+      "name": "Day1CPT Universities",
+      "url": "https://day1cptuniversities.com",
+      "sitemap": "https://day1cptuniversities.com/sitemap.xml",
+      "exclude": []
+    },
+    {
+      "code": "D1CC",
+      "name": "Day1CPT",
+      "url": "https://day1cpt.com",
+      "sitemap": "https://day1cpt.com/sitemap.xml",
+      "exclude": []
+    },
+    {
+      "code": "DOG",
+      "name": "CPTDog",
+      "url": "https://cptdog.com",
+      "sitemap": "https://cptdog.com/sitemap.xml",
+      "exclude": []
+    },
+    {
+      "code": "VD",
+      "name": "VeteranDegrees",
+      "url": "https://veterandegrees.com",
+      "sitemap": "https://veterandegrees.com/sitemap.xml",
+      "exclude": []
+    }
+  ]
+}
