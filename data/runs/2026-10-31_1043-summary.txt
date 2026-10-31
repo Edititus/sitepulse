@@ -1,0 +1,19 @@
+SitePulse daily check: 31 Oct 2026 (mobile, lab test)
+Tested 859 pages on 6 sites in 53 min. 10 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+GE: 475 tested · 2% pass · median score 57 · median LCP 5.3 s · 6 errors
+ORG: 78 tested · 0% pass · median score 37 · median LCP 7.0 s
+D1CU: 133 tested · 0% pass · median score 46 · median LCP 12.5 s
+D1CC: 56 tested · 0% pass · median score 56 · median LCP 7.1 s · 4 errors
+DOG: 74 tested · 0% pass · median score 36 · median LCP 12.5 s
+VD: 43 tested · 10% pass · median score 67 · median LCP 6.0 s
+
+Slowest pages (time until main content shows):
+1. VD /schools/bay-atlantic-university: 111.4 s (score 49)
+2. VD /guides/gi-bill/california: 88.4 s (score 53)
+3. ORG /day-1-cpt-universities-by-on-site-frequency: 37.4 s (score 40)
+4. ORG /top-15-day-1-cpt-universities: 32.5 s (score 35)
+5. GE /partners/recruiting-partners: 31.9 s (score 27)
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41193912738
