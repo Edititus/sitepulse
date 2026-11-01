@@ -1,0 +1,19 @@
+SitePulse daily check: 1 Nov 2026 (mobile, lab test)
+Tested 824 pages on 6 sites in 48 min. 11 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+GE: 453 tested · 2% pass · median score 60 · median LCP 5.9 s · 7 errors
+ORG: 72 tested · 0% pass · median score 36 · median LCP 8.6 s
+D1CU: 141 tested · 6% pass · median score 53 · median LCP 7.7 s
+D1CC: 44 tested · 0% pass · median score 57 · median LCP 6.7 s · 4 errors
+DOG: 70 tested · 0% pass · median score 40 · median LCP 12.1 s
+VD: 44 tested · 10% pass · median score 66 · median LCP 4.3 s
+
+Slowest pages (time until main content shows):
+1. VD /schools/california-institute-of-advanced-management: 187.8 s (score 49)
+2. VD /schools/monroe-university: 119.2 s (score 48)
+3. VD /guides/gi-bill/california: 78.0 s (score 40)
+4. DOG /2026-day-1-cpt-programs/north-carolina-wesleyan-university: 32.3 s (score 35)
+5. ORG /day-1-cpt-universities-by-on-site-frequency: 31.1 s (score 34)
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41302878510
