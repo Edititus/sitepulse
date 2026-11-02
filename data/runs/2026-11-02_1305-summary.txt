@@ -1,0 +1,19 @@
+SitePulse daily check: 2 Nov 2026 (mobile, lab test)
+Tested 835 pages on 6 sites in 52 min. 9 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+GE: 453 tested · 2% pass · median score 57 · median LCP 5.8 s · 5 errors
+ORG: 71 tested · 0% pass · median score 38 · median LCP 9.1 s
+D1CU: 137 tested · 0% pass · median score 51 · median LCP 7.8 s
+D1CC: 51 tested · 0% pass · median score 54 · median LCP 6.4 s · 4 errors
+DOG: 78 tested · 0% pass · median score 38 · median LCP 12.6 s
+VD: 45 tested · 5% pass · median score 70 · median LCP 3.5 s
+
+Slowest pages (time until main content shows):
+1. VD /guides/gi-bill/california: 78.5 s (score 40)
+2. GE /westcliff-application: 33.9 s (score 7)
+3. ORG /top-15-day-1-cpt-universities: 32.9 s (score 38)
+4. ORG /cheapest-day-1-cpt-universities: 31.2 s (score 39)
+5. DOG /2026-day-1-cpt-programs/ottawa-university: 30.2 s (score 51)
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41449888402
