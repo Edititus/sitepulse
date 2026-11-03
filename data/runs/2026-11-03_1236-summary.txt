@@ -1,0 +1,19 @@
+SitePulse daily check: 3 Nov 2026 (mobile, lab test)
+Tested 869 pages on 6 sites in 52 min. 8 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+GE: 462 tested · 1% pass · median score 57 · median LCP 5.9 s · 4 errors
+ORG: 83 tested · 0% pass · median score 37 · median LCP 7.4 s
+D1CU: 143 tested · 0% pass · median score 52 · median LCP 5.9 s
+D1CC: 48 tested · 0% pass · median score 58 · median LCP 6.8 s · 4 errors
+DOG: 90 tested · 0% pass · median score 41 · median LCP 10.8 s
+VD: 43 tested · 2% pass · median score 66 · median LCP 3.9 s
+
+Slowest pages (time until main content shows):
+1. VD /schools/bay-atlantic-university: 95.5 s (score 37)
+2. VD /guides/gi-bill/california: 86.0 s (score 49)
+3. GE /westcliff-application: 41.3 s (score 18)
+4. GE /free-application/medium: 34.3 s (score 28)
+5. VD /guides/va-approved-schools: 33.2 s (score 46)
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41637194775
