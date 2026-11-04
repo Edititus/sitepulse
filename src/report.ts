@@ -12,6 +12,8 @@ export interface ResultRow extends Partial<PageSummary> {
   strategy: string;
   error: string | null;
   pass: boolean | null; // null when the test failed
+  retested?: boolean; // tested twice because it looked worse; the faster result is kept
+  alert?: string[]; // confirmed alert kinds, if any
 }
 
 /** Lab "pass" uses Google's "good" targets. INP needs real visitors, so it's not in the lab check. */
@@ -67,7 +69,13 @@ export interface MessageInput {
   sitemapErrors: Record<string, string>;
   runLink: string | null;
   thresholds: Thresholds;
+  alertCount?: number; // confirmed alerts (sent as a separate message)
+  unconfirmed?: number; // looked worse once but the second test disagreed
+  monthMinutes?: number | null; // GitHub Actions minutes used this month
 }
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const SUSPICIOUS_MS = 60_000;
 
 export function buildMessage(m: MessageInput): string {
   const stats = m.siteCodes.map((s) => siteStats(m.rows, s));
@@ -75,8 +83,14 @@ export function buildMessage(m: MessageInput): string {
   const errors = stats.reduce((a, s) => a + s.errors, 0);
   const lines: string[] = [];
   lines.push(`SitePulse daily check: ${m.dateLabel} (${m.strategy}, lab test)`);
-  lines.push(`Tested ${tested} pages on ${m.siteCodes.length} sites in ${m.minutes} min.` + (errors ? ` ${errors} could not be tested.` : ""));
+  lines.push(`Tested ${plural(tested, "page", "pages")} on ${plural(m.siteCodes.length, "site", "sites")} in ${m.minutes} min.` +
+    (errors ? ` ${errors} could not be tested.` : ""));
   lines.push(`Pass = LCP ≤ ${m.thresholds.lcp_ms / 1000} s, CLS ≤ ${m.thresholds.cls}, TBT ≤ ${m.thresholds.tbt_ms} ms.`);
+  if (m.alertCount !== undefined) {
+    lines.push(m.alertCount
+      ? `⚠ ${plural(m.alertCount, "page got", "pages got")} worse since last check (see the alert message).`
+      : "No page got worse than its usual result." + (m.unconfirmed ? ` (${m.unconfirmed} looked worse at first, but the retests were fine.)` : ""));
+  }
   lines.push("");
   for (const s of stats) {
     if (m.sitemapErrors[s.site]) {
@@ -85,17 +99,35 @@ export function buildMessage(m: MessageInput): string {
     }
     lines.push(
       `${s.site}: ${s.tested} tested · ${s.pass_rate === null ? "pass rate n/a" : `${s.pass_rate}% pass`} · median score ${s.median_score ?? "n/a"} · median LCP ${secs(s.median_lcp_ms)}` +
-        (s.errors ? ` · ${s.errors} ${s.errors === 1 ? "error" : "errors"}` : ""),
+        (s.errors ? ` · ${plural(s.errors, "error", "errors")}` : ""),
     );
   }
-  const slowest = m.rows
-    .filter((r) => !r.error && typeof r.lab?.lcp_ms === "number")
+  const measured = m.rows.filter((r) => !r.error && typeof r.lab?.lcp_ms === "number");
+  const slowest = measured
+    .filter((r) => r.lab!.lcp_ms! <= SUSPICIOUS_MS)
     .sort((a, b) => b.lab!.lcp_ms! - a.lab!.lcp_ms!)
     .slice(0, 5);
   if (slowest.length) {
     lines.push("");
     lines.push("Slowest pages (time until main content shows):");
     slowest.forEach((r, i) => lines.push(`${i + 1}. ${r.site} ${shortPath(r.url)}: ${secs(r.lab!.lcp_ms)} (score ${r.score ?? "n/a"})`));
+  }
+  const odd = measured.filter((r) => r.lab!.lcp_ms! > SUSPICIOUS_MS);
+  if (odd.length) {
+    lines.push("");
+    lines.push(`Needs a look: ${plural(odd.length, "page", "pages")} measured over 60 s, usually a popup or banner that appears very late: ` +
+      odd.slice(0, 3).map((r) => `${r.site} ${shortPath(r.url)}`).join(", ") + (odd.length > 3 ? ", ..." : ""));
+  }
+  const failed = m.rows.filter((r) => r.error);
+  if (failed.length) {
+    lines.push("");
+    lines.push("Could not be tested:");
+    failed.slice(0, 5).forEach((r) => lines.push(`- ${r.site} ${shortPath(r.url)}: ${r.error}`));
+    if (failed.length > 5) lines.push(`- +${failed.length - 5} more in the results file`);
+  }
+  if (typeof m.monthMinutes === "number") {
+    lines.push("");
+    lines.push(`GitHub minutes used this month: about ${m.monthMinutes} of 2,000 free.`);
   }
   if (m.runLink) {
     lines.push("");

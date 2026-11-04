@@ -11,6 +11,16 @@
     "tbt_ms": 200,
     "inp_ms": 200
   },
+  "alerts": {
+    "lcp_ratio": 2,
+    "lcp_min_ms": 2500,
+    "tbt_ratio": 4,
+    "tbt_min_ms": 1500,
+    "cls_min_increase": 0.05,
+    "min_history": 2,
+    "history_size": 3,
+    "max_suspects": 30
+  },
   "sites": [
     {
       "code": "GE",

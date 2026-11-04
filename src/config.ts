@@ -19,6 +19,17 @@ export interface Thresholds {
   inp_ms: number;
 }
 
+export interface AlertSettings {
+  lcp_ratio?: number;
+  lcp_min_ms?: number;
+  tbt_ratio?: number;
+  tbt_min_ms?: number;
+  cls_min_increase?: number;
+  min_history?: number;
+  history_size?: number;
+  max_suspects?: number; // pages re-tested per run (2 extra tests each)
+}
+
 export interface Config {
   strategies: Strategy[];
   rate_per_minute: number;
@@ -27,6 +38,7 @@ export interface Config {
   samples_per_template: number;
   template_min_pages: number;
   thresholds: Thresholds;
+  alerts?: AlertSettings;
   sites: Site[];
 }
 

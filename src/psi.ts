@@ -68,6 +68,8 @@ export interface PageSummary {
     render_blocking: Array<{ url: string; wasted_ms: number | null }>;
     third_parties: Array<{ name: string; blocking_ms: number | null; bytes: number | null }>;
   };
+  /** Every script the page loaded, by host. Used to spot new scripts. Absent on rows saved before Nov 2026. */
+  scripts?: { hosts: string[]; count: number; bytes: number };
   lighthouse: string | null;
 }
 
@@ -141,6 +143,22 @@ export function summarize(psi: Json): PageSummary {
     .filter((x) => x && typeof x === "object")
     .sort((a, b) => cost(b) - cost(a));
 
+  const requests = itemsOf(audits, "network-requests");
+  const scriptReqs = requests.filter((r) => r?.resourceType === "Script" && typeof r?.url === "string");
+  const hosts = new Set<string>();
+  for (const r of scriptReqs) {
+    try {
+      hosts.add(new URL(r.url).host);
+    } catch {}
+  }
+  const scripts = requests.length
+    ? {
+        hosts: [...hosts].sort().slice(0, 60),
+        count: scriptReqs.length,
+        bytes: Math.round(scriptReqs.reduce((a, r) => a + (num(r.transferSize) ?? 0), 0)),
+      }
+    : undefined;
+
   return {
     score: perf === null ? null : Math.round(perf * 100),
     lab: {
@@ -172,8 +190,18 @@ export function summarize(psi: Json): PageSummary {
         bytes: ms(i.transferSize),
       })),
     },
+    ...(scripts ? { scripts } : {}),
     lighthouse: lhr.lighthouseVersion ?? null,
   };
+}
+
+// Wording of firewall / bot-protection pages. Google's test is sometimes shown one of these
+// instead of the real page; that result says nothing about the page's speed.
+const BLOCK_PAGE = /you[’']ve been blocked|blocked for security reasons|access denied|attention required|just a moment\.\.\.|verify you are human|checking your browser/i;
+
+export function isBlockPage(s: PageSummary): boolean {
+  const el = s.hints.lcp_element;
+  return BLOCK_PAGE.test(`${el?.label ?? ""} ${el?.snippet ?? ""}`);
 }
 
 export interface TestResult {
@@ -197,7 +225,11 @@ export async function runTest(
     await limiter.wait();
     try {
       const res = await fetcher(`${PSI_ENDPOINT}?${params}`, { signal: AbortSignal.timeout(timeoutMs) });
-      if (res.ok) return { summary: summarize(await res.json()), error: null };
+      if (res.ok) {
+        const summary = summarize(await res.json());
+        if (isBlockPage(summary)) return { summary: null, error: "Blocked by the site's security check (Google's test was shown a block page)" };
+        return { summary, error: null };
+      }
       let message = "";
       try {
         message = String((await res.json())?.error?.message ?? "").slice(0, 200);

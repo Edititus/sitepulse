@@ -286,6 +286,185 @@
     ]
    },
    "guidanceLevel": 3
+  },
+  "network-requests": {
+   "id": "network-requests",
+   "title": "Network Requests",
+   "description": "Lists the network requests that were made during page load.",
+   "score": 1,
+   "scoreDisplayMode": "informative",
+   "details": {
+    "type": "table",
+    "headings": [
+     {
+      "key": "url",
+      "valueType": "url",
+      "label": "URL"
+     },
+     {
+      "key": "protocol",
+      "valueType": "text",
+      "label": "Protocol"
+     },
+     {
+      "key": "networkRequestTime",
+      "valueType": "ms",
+      "granularity": 1,
+      "label": "Network Request Time"
+     },
+     {
+      "key": "networkEndTime",
+      "valueType": "ms",
+      "granularity": 1,
+      "label": "Network End Time"
+     },
+     {
+      "key": "transferSize",
+      "valueType": "bytes",
+      "displayUnit": "kb",
+      "granularity": 1,
+      "label": "Transfer Size"
+     },
+     {
+      "key": "resourceSize",
+      "valueType": "bytes",
+      "displayUnit": "kb",
+      "granularity": 1,
+      "label": "Resource Size"
+     },
+     {
+      "key": "statusCode",
+      "valueType": "text",
+      "label": "Status Code"
+     },
+     {
+      "key": "mimeType",
+      "valueType": "text",
+      "label": "MIME Type"
+     },
+     {
+      "key": "resourceType",
+      "valueType": "text",
+      "label": "Resource Type"
+     }
+    ],
+    "items": [
+     {
+      "url": "http://localhost:8765/",
+      "sessionTargetType": "page",
+      "protocol": "http/1.0",
+      "cache": "none",
+      "rendererStartTime": 0,
+      "networkRequestTime": 3.187999999994645,
+      "networkEndTime": 22.902000000001863,
+      "finished": true,
+      "transferSize": 392,
+      "resourceSize": 205,
+      "statusCode": 200,
+      "mimeType": "text/html",
+      "resourceType": "Document",
+      "priority": "VeryHigh",
+      "experimentalFromMainFrame": true,
+      "entity": "localhost"
+     },
+     {
+      "url": "http://localhost:8765/a.css",
+      "sessionTargetType": "page",
+      "protocol": "http/1.0",
+      "cache": "none",
+      "rendererStartTime": 52.711000000010245,
+      "networkRequestTime": 64.03399999999965,
+      "networkEndTime": 71.59799999999814,
+      "finished": true,
+      "transferSize": 214,
+      "resourceSize": 29,
+      "statusCode": 200,
+      "mimeType": "text/css",
+      "resourceType": "Stylesheet",
+      "priority": "VeryHigh",
+      "experimentalFromMainFrame": true,
+      "entity": "localhost"
+     },
+     {
+      "url": "http://localhost:8765/b.js",
+      "sessionTargetType": "page",
+      "protocol": "http/1.0",
+      "cache": "none",
+      "rendererStartTime": 54.28900000000431,
+      "networkRequestTime": 64.33799999998882,
+      "networkEndTime": 72.06200000000536,
+      "finished": true,
+      "transferSize": 235,
+      "resourceSize": 43,
+      "statusCode": 200,
+      "mimeType": "text/javascript",
+      "resourceType": "Script",
+      "priority": "High",
+      "experimentalFromMainFrame": true,
+      "entity": "localhost"
+     },
+     {
+      "url": "http://localhost:8765/hero.svg",
+      "sessionTargetType": "page",
+      "protocol": "http/1.0",
+      "cache": "none",
+      "rendererStartTime": 54.68600000000151,
+      "networkRequestTime": 64.50099999998929,
+      "networkEndTime": 71.89199999999255,
+      "finished": true,
+      "transferSize": 307,
+      "resourceSize": 116,
+      "statusCode": 200,
+      "mimeType": "image/svg+xml",
+      "resourceType": "Image",
+      "priority": "Medium",
+      "experimentalFromMainFrame": true,
+      "entity": "localhost"
+     },
+     {
+      "url": "http://localhost:8765/favicon.ico",
+      "sessionTargetType": "page",
+      "protocol": "http/1.0",
+      "cache": "none",
+      "rendererStartTime": 392.3899999999994,
+      "networkRequestTime": 394.3220000000001,
+      "networkEndTime": 397.7869999999966,
+      "finished": true,
+      "transferSize": 521,
+      "resourceSize": 335,
+      "statusCode": 404,
+      "mimeType": "text/html",
+      "resourceType": "Other",
+      "priority": "High",
+      "experimentalFromMainFrame": true,
+      "entity": "localhost"
+     }
+    ],
+    "debugData": {
+     "type": "debugdata",
+     "networkStartTimeTs": 96292371,
+     "initiators": [
+      {
+       "type": "parser",
+       "url": "http://localhost:8765/",
+       "lineNumber": 0,
+       "columnNumber": 79
+      },
+      {
+       "type": "parser",
+       "url": "http://localhost:8765/",
+       "lineNumber": 0,
+       "columnNumber": 98
+      },
+      {
+       "type": "parser",
+       "url": "http://localhost:8765/",
+       "lineNumber": 0,
+       "columnNumber": 179
+      }
+     ]
+    }
+   }
   }
  }
 }

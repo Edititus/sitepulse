@@ -2,7 +2,8 @@ name: SitePulse daily check
 
 on:
   schedule:
-    - cron: "0 5 * * *" # 05:00 UTC = 06:00 in Lagos, every day
+    # 04:17 UTC = 05:17 in Lagos. GitHub delays jobs set exactly on the hour, so this uses an odd minute.
+    - cron: "17 4 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -22,9 +23,14 @@ on:
         description: "Send the summary to Lark"
         type: boolean
         default: true
+      weekly:
+        description: "Also send the weekly worst-pages list (it is sent automatically on Mondays)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # lets the run save its results into data/runs
+  actions: read # lets the summary show GitHub minutes used this month
 
 concurrency:
   group: sitepulse
@@ -45,12 +51,14 @@ jobs:
         env:
           PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
           LARK_WEBHOOK_URL: ${{ secrets.LARK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: >
           node src/monitor.ts
           --mode "${{ inputs.mode || 'daily' }}"
           --site "${{ inputs.site || '' }}"
           --limit "${{ inputs.limit || '0' }}"
           --notify "${{ github.event_name == 'schedule' || inputs.notify }}"
+          --weekly "${{ inputs.weekly && 'true' || 'auto' }}"
 
       - name: Save results to the repository
         if: always() && (inputs.mode || 'daily') != 'dry-run'

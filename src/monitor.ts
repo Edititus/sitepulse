@@ -1,11 +1,13 @@
-// SitePulse daily check: read sitemaps, choose today's pages, test them, save the
-// results and send a summary to Lark.
+// SitePulse daily check: read sitemaps, choose today's pages, test them, compare
+// each page with its own last result, confirm anything that got worse with a
+// second test, save the results and tell Lark (summary + alerts + weekly list).
 //
 // Usage:
 //   node src/monitor.ts                      # today's daily selection, all sites
 //   node src/monitor.ts --site D1CU --limit 5
 //   node src/monitor.ts --mode full          # every page (slow, ~2 hours)
 //   node src/monitor.ts --mode dry-run       # list pages only, no tests
+//   node src/monitor.ts --weekly true        # also send the weekly list today
 //
 // Needs PAGESPEED_API_KEY (except dry-run). LARK_WEBHOOK_URL is optional.
 
@@ -16,6 +18,13 @@ import { applyExcludes, dayNumberUtc, fetchSitemapUrls, selectPages, type Select
 import { RateLimiter, runTest } from "./psi.ts";
 import { sendText } from "./lark.ts";
 import { buildMessage, passes, type ResultRow } from "./report.ts";
+import { keyOf, recentByPage, runFiles } from "./history.ts";
+import {
+  DEFAULT_RULES, buildAlertMessage, buildBaseline, confirm, detect, explainCauses, templateKey,
+  type Alert, type AlertRules, type Detection,
+} from "./alerts.ts";
+import { buildWeekly, latestIncludingErrors } from "./weekly.ts";
+import { minutesThisMonth } from "./github.ts";
 
 const { values: args } = parseArgs({
   options: {
@@ -25,6 +34,8 @@ const { values: args } = parseArgs({
     strategy: { type: "string", default: "" }, // overrides sites.json, e.g. "mobile"
     notify: { type: "string", default: "true" },
     config: { type: "string", default: "sites.json" },
+    weekly: { type: "string", default: "auto" }, // auto = Mondays (Lagos) | true | false
+    "max-retests": { type: "string", default: "" }, // overrides alerts.max_suspects
   },
 });
 
@@ -92,35 +103,108 @@ if (mode === "dry-run") {
 const limiter = new RateLimiter(config.rate_per_minute);
 const rows: ResultRow[] = [];
 const jobs = plan.flatMap((p) => strategies.map((strategy) => ({ ...p, strategy })));
-let next = 0;
-let done = 0;
-async function worker() {
-  while (next < jobs.length) {
-    const job = jobs[next++];
-    const { summary, error } = await runTest(job.url, apiKey, job.strategy, limiter);
-    rows.push({
-      run_id: runId,
-      site: job.site,
-      url: job.url,
-      reason: job.reason,
-      strategy: job.strategy,
-      error,
-      ...(summary ?? {}),
-      pass: summary ? passes(summary, config.thresholds) : null,
-    });
-    done++;
-    if (done % 25 === 0 || done === jobs.length) console.log(`  ${done}/${jobs.length} tested`);
-  }
-}
-await Promise.all(Array.from({ length: Math.min(config.concurrency, jobs.length) }, worker));
 
-// 3. Save results (committed back to the repo by the workflow).
-mkdirSync("data/runs", { recursive: true });
+function toRow(job: { site: string; url: string; reason: Selected["reason"]; strategy: Strategy }, r: Awaited<ReturnType<typeof runTest>>): ResultRow {
+  return {
+    run_id: runId,
+    site: job.site,
+    url: job.url,
+    reason: job.reason,
+    strategy: job.strategy,
+    error: r.error,
+    ...(r.summary ?? {}),
+    pass: r.summary ? passes(r.summary, config.thresholds) : null,
+  };
+}
+
+async function runPool<T>(items: T[], work: (item: T) => Promise<void>) {
+  let next = 0;
+  const workerFn = async () => {
+    while (next < items.length) await work(items[next++]);
+  };
+  await Promise.all(Array.from({ length: Math.min(config.concurrency, items.length) }, workerFn));
+}
+
+let done = 0;
+await runPool(jobs, async (job) => {
+  rows.push(toRow(job, await runTest(job.url, apiKey, job.strategy, limiter)));
+  done++;
+  if (done % 25 === 0 || done === jobs.length) console.log(`  ${done}/${jobs.length} tested`);
+});
+
+// 3. Compare each page with its usual result (median of its last few results).
+//    Anything that looks clearly worse is tested twice more and only alerts if all three tests agree.
+const RUNS_DIR = "data/runs";
+const rules: AlertRules = { ...DEFAULT_RULES, ...(config.alerts ?? {}) };
+const history = recentByPage(runFiles(RUNS_DIR, started, 30, runId), rules.history_size);
+const baselines = new Map<string, ResultRow>();
+const suspects: Array<{ index: number; first: Detection; jump: number }> = [];
+rows.forEach((row, index) => {
+  const base = buildBaseline(history.get(keyOf(row)), rules);
+  if (!base) return;
+  baselines.set(keyOf(row), base);
+  const first = detect(row, base, config.thresholds, rules);
+  if (first.kinds.length) suspects.push({ index, first, jump: (row.lab?.lcp_ms ?? 0) / (base.lab?.lcp_ms || 1) });
+});
+// Biggest jumps first, so the retest budget goes to the most likely real problems.
+suspects.sort((x, y) => y.jump - x.jump);
+const maxSuspects = Math.max(0, parseInt(args["max-retests"]!, 10) || config.alerts?.max_suspects || 30);
+const toRetest = suspects.slice(0, maxSuspects);
+console.log(`${baselines.size} pages have enough history to compare. ${suspects.length} look worse; re-testing ${toRetest.length} twice each.`);
+
+const alerts: Alert[] = [];
+let unconfirmed = suspects.length - toRetest.length;
+await runPool(toRetest, async ({ index, first }) => {
+  const row = rows[index];
+  const base = baselines.get(keyOf(row))!;
+  const job = { ...row, strategy: row.strategy as Strategy };
+  const extra: ResultRow[] = [];
+  for (let i = 0; i < 2; i++) {
+    const r = toRow(job, await runTest(row.url, apiKey, job.strategy, limiter));
+    if (r.error || !r.lab) break; // a failed retest means we can't confirm
+    extra.push(r);
+    if (!detect(r, base, config.thresholds, rules).kinds.length) break; // already disproved
+  }
+  const tests = [row, ...extra];
+  const best = tests.reduce((x, y) => ((y.lab?.lcp_ms ?? Infinity) < (x.lab?.lcp_ms ?? Infinity) ? y : x));
+  const result = extra.length === 2
+    ? confirm(tests.map((r) => detect(r, base, config.thresholds, rules)), detect(best, base, config.thresholds, rules))
+    : { kinds: [], changes: [], newHosts: [] };
+  // Save the fastest of the tests as today's result, so a fluke never becomes part of the baseline.
+  rows[index] = { ...best, retested: true, ...(result.kinds.length ? { alert: result.kinds } : {}) };
+  if (!result.kinds.length) {
+    unconfirmed++;
+    return;
+  }
+  alerts.push({
+    site: row.site,
+    url: row.url,
+    template: templateKey(row.url),
+    kinds: result.kinds,
+    changes: result.changes,
+    causes: explainCauses(best, base, result),
+    prevRunId: base.run_id,
+  });
+});
+alerts.sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));
+console.log(`${alerts.length} confirmed, ${unconfirmed} not confirmed.`);
+
+// 4. Save results (committed back to the repo by the workflow).
+mkdirSync(RUNS_DIR, { recursive: true });
 rows.sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));
-writeFileSync(`data/runs/${runId}.jsonl`, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");
+writeFileSync(`${RUNS_DIR}/${runId}.jsonl`, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");
+
+const lagosDate = (d: Date, opts: Intl.DateTimeFormatOptions) => d.toLocaleDateString("en-GB", { ...opts, timeZone: "Africa/Lagos" });
+const dateLabel = lagosDate(started, { day: "numeric", month: "short", year: "numeric" });
+const runIdDate = (id: string) => {
+  const d = new Date(`${id.slice(0, 10)}T${id.slice(11, 13)}:${id.slice(13, 15)}:00Z`);
+  return Number.isNaN(d.getTime()) ? id : lagosDate(d, { day: "numeric", month: "short" });
+};
+const runDates = Object.fromEntries(alerts.map((a) => [a.prevRunId, runIdDate(a.prevRunId)]));
+
 const minutes = Math.max(1, Math.round((Date.now() - started.getTime()) / 60_000));
 const message = buildMessage({
-  dateLabel: started.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }),
+  dateLabel,
   strategy: strategies.join("+"),
   minutes,
   rows,
@@ -128,14 +212,30 @@ const message = buildMessage({
   sitemapErrors,
   runLink,
   thresholds: config.thresholds,
+  alertCount: alerts.length,
+  unconfirmed,
+  monthMinutes: await minutesThisMonth(started),
 });
-writeFileSync(`data/runs/${runId}-summary.txt`, message + "\n");
-console.log("\n" + message);
+const alertMessage = buildAlertMessage(alerts, dateLabel, runDates);
+const isMondayInLagos = lagosDate(started, { weekday: "long" }) === "Monday";
+const sendWeekly = args.weekly === "true" || (args.weekly === "auto" && isMondayInLagos && !limit && !wanted.length);
+const weeklyMessage = sendWeekly
+  ? buildWeekly(
+      latestIncludingErrors(runFiles(RUNS_DIR, started, 7, runId), rows),
+      `week to ${lagosDate(started, { day: "numeric", month: "short", year: "numeric" })}`,
+    )
+  : null;
 
-// 4. Tell Lark.
+const report = [message, alertMessage, weeklyMessage].filter(Boolean).join("\n\n----\n\n");
+writeFileSync(`${RUNS_DIR}/${runId}-summary.txt`, report + "\n");
+console.log("\n" + report);
+
+// 5. Tell Lark: the summary, then alerts (if any), then the weekly list (Mondays).
 if (notify && webhook) {
   await sendText(webhook, message);
-  console.log("Sent summary to Lark.");
+  if (alertMessage) await sendText(webhook, alertMessage);
+  if (weeklyMessage) await sendText(webhook, weeklyMessage);
+  console.log(`Sent ${1 + (alertMessage ? 1 : 0) + (weeklyMessage ? 1 : 0)} message(s) to Lark.`);
 }
 const failed = rows.filter((r) => r.error).length;
 if (rows.length && failed === rows.length) {

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { RateLimiter, runTest, summarize } from "../src/psi.ts";
+import { RateLimiter, isBlockPage, runTest, summarize } from "../src/psi.ts";
 import { passes } from "../src/report.ts";
 
 const thresholds = { lcp_ms: 2500, cls: 0.1, tbt_ms: 200, inp_ms: 200 };
@@ -112,4 +112,17 @@ test("rate limiter never allows more than the limit within a minute", async () =
   assert.equal(fourthStarted, false, "fourth waits for the window");
   await fourth;
   assert.ok(Date.now() - t0 >= 1000, "fourth starts only after the window passes");
+});
+
+test("a firewall block page is recorded as an error, not as a fast page", async () => {
+  const blocked = structuredClone(sample) as any;
+  blocked.lighthouseResult.audits["largest-contentful-paint-element"].details.items[0].items[0].node = { snippet: "<h1>", nodeLabel: "You’ve been blocked for security reasons" };
+  assert.equal(isBlockPage(summarize(blocked)), true);
+  const news = structuredClone(sample) as any;
+  news.lighthouseResult.audits["largest-contentful-paint-element"].details.items[0].items[0].node = { snippet: "<h2>", nodeLabel: "H-1B Rule Blocked by Court" };
+  assert.equal(isBlockPage(summarize(news)), false, "a news headline with 'blocked' is fine");
+  const fetcher = (async () => new Response(JSON.stringify(blocked), { status: 200 })) as typeof fetch;
+  const r = await runTest("https://g.com/", "K", "mobile", new RateLimiter(30), { fetcher, backoffMs: 1 });
+  assert.equal(r.summary, null);
+  assert.match(r.error!, /Blocked by the site's security check/);
 });
