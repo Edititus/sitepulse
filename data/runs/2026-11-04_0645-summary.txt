@@ -1,0 +1,20 @@
+SitePulse daily check: 4 Nov 2026 (mobile, lab test)
+Tested 9 pages on 1 site in 1 min. 1 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+No page got worse than its usual result.
+
+D1CU: 9 tested · 0% pass · median score 55 · median LCP 4.4 s · 1 error
+
+Slowest pages (time until main content shows):
+1. D1CU /avila-university/mba: 6.6 s (score 53)
+2. D1CU /avila-university-arizona/ms-technology-management: 6.5 s (score 48)
+3. D1CU /bay-atlantic-university: 6.0 s (score 53)
+4. D1CU /avila-university-arizona: 4.8 s (score 48)
+5. D1CU /baptist-university-of-florida: 4.4 s (score 55)
+
+Could not be tested:
+- D1CU /bay-atlantic-university/ms-cloud-computing-engineering: Blocked by the site's security check (Google's test was shown a block page)
+
+GitHub minutes used this month: about 156 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/41787649937
