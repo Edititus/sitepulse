@@ -12,7 +12,9 @@ Every morning (scheduled for 05:17 Lagos time; GitHub may start it later), SiteP
 4. Compares each page with its usual result (the median of its last 3 results; a page needs at least 2 earlier results). Google's lab test swings a lot from day to day on the same page, so only big changes count: main content twice as slow and 2.5 s+ slower, script freezing 4x and 1.5 s+ longer, layout jumps up by 0.05+, a script from a source never seen before, or a page that usually passes now failing. Each suspect is tested twice more and alerts only if all three tests agree. Every alert explains the likely cause in plain English. Tests where the site's firewall showed Google a block page are recorded as "blocked", not as results. The rules are in `sites.json` under `alerts`.
 5. Saves the results in `data/runs/` and posts to the SitePulse Lark group: the daily summary, any alerts, and on Mondays a weekly list of the slowest pages, pages that need a look (measured over 60 s, usually a late popup) and pages that couldn't be tested.
 
-Coming next: matching each alert to the fixes that worked before, and a draft fix prepared with Claude for a human to approve. SitePulse never changes a live website by itself.
+6. Matches each alert to `playbook.json`, the fixes that worked on GoElite sites this fall. The alert names the closest past fix, what worked and what to watch out for, warns against things that were tried and failed, and flags known unfixed issues. Add new fixes to the file as you make them; no code change needed.
+
+Coming next: a draft fix prepared with Claude for a human to approve. SitePulse never changes a live website by itself.
 
 ## Sites
 

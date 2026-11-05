@@ -69,7 +69,7 @@ export interface PageSummary {
     third_parties: Array<{ name: string; blocking_ms: number | null; bytes: number | null }>;
   };
   /** Every script the page loaded, by host. Used to spot new scripts. Absent on rows saved before Nov 2026. */
-  scripts?: { hosts: string[]; count: number; bytes: number };
+  scripts?: { hosts: string[]; count: number; bytes: number; frames?: string[] };
   lighthouse: string | null;
 }
 
@@ -151,11 +151,28 @@ export function summarize(psi: Json): PageSummary {
       hosts.add(new URL(r.url).host);
     } catch {}
   }
+  // Embedded frames (calendars, videos, chat) load as extra documents after the page itself.
+  const mainHost = (() => {
+    try {
+      return new URL(String(lhr.finalDisplayedUrl ?? lhr.finalUrl ?? requests[0]?.url)).host;
+    } catch {
+      return "";
+    }
+  })();
+  const frames = new Set<string>();
+  requests.forEach((r, i) => {
+    if (i === 0 || r?.resourceType !== "Document" || typeof r?.url !== "string") return;
+    try {
+      const h = new URL(r.url).host;
+      if (h && h !== mainHost) frames.add(h);
+    } catch {}
+  });
   const scripts = requests.length
     ? {
         hosts: [...hosts].sort().slice(0, 60),
         count: scriptReqs.length,
         bytes: Math.round(scriptReqs.reduce((a, r) => a + (num(r.transferSize) ?? 0), 0)),
+        frames: [...frames].sort().slice(0, 30),
       }
     : undefined;
 

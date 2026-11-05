@@ -39,11 +39,16 @@ export const DEFAULT_RULES: AlertRules = {
   history_size: 3,
 };
 
+export type Metric = "lcp" | "tbt" | "cls";
+
 export interface Detection {
   kinds: AlertKind[];
   changes: string[]; // plain-English "what changed" lines
-  newHosts: string[];
+  newHosts: string[]; // new script sources and new embedded frames
+  metrics: Metric[]; // which numbers got worse
 }
+
+const EMPTY: Detection = { kinds: [], changes: [], newHosts: [], metrics: [] };
 
 export interface Alert {
   site: string;
@@ -53,6 +58,7 @@ export interface Alert {
   changes: string[];
   causes: string[];
   prevRunId: string;
+  playbook?: string[]; // "Similar past fix" / "Don't retry" / "Known issue" lines
 }
 
 const secs = (msv: number) => `${(msv / 1000).toFixed(1)} s`;
@@ -94,16 +100,25 @@ export function buildBaseline(prevs: ResultRow[] | undefined, rules: AlertRules 
     ...last,
     lab,
     pass: usable.filter((r) => r.pass === true).length * 2 > usable.length,
-    // Scripts are compared only when every earlier result recorded them.
+    // Scripts (and embedded frames) are compared only when every earlier result recorded them.
     ...(withScripts.length === usable.length
-      ? { scripts: { hosts: [...new Set(withScripts.flatMap((r) => r.scripts!.hosts))].sort(), count: last.scripts!.count, bytes: last.scripts!.bytes } }
+      ? {
+          scripts: {
+            hosts: [...new Set(withScripts.flatMap((r) => r.scripts!.hosts))].sort(),
+            count: last.scripts!.count,
+            bytes: last.scripts!.bytes,
+            ...(withScripts.every((r) => Array.isArray(r.scripts!.frames))
+              ? { frames: [...new Set(withScripts.flatMap((r) => r.scripts!.frames!))].sort() }
+              : {}),
+          },
+        }
       : { scripts: undefined }),
   };
 }
 
 /** Compare a page's result with its usual (baseline) result. */
 export function detect(now: ResultRow, base: ResultRow | undefined, t: Thresholds, rules: AlertRules = DEFAULT_RULES): Detection {
-  const out: Detection = { kinds: [], changes: [], newHosts: [] };
+  const out: Detection = { kinds: [], changes: [], newHosts: [], metrics: [] };
   if (!base || now.error || !now.lab || !base.lab) return out;
   const a = base.lab;
   const b = now.lab;
@@ -112,12 +127,15 @@ export function detect(now: ResultRow, base: ResultRow | undefined, t: Threshold
     const slower: string[] = [];
     if (a.lcp_ms !== null && b.lcp_ms !== null && b.lcp_ms >= a.lcp_ms * rules.lcp_ratio && b.lcp_ms - a.lcp_ms >= rules.lcp_min_ms) {
       slower.push(`Main content shows: usually ${secs(a.lcp_ms)}, now ${secs(b.lcp_ms)}`);
+      out.metrics.push("lcp");
     }
     if (a.tbt_ms !== null && b.tbt_ms !== null && b.tbt_ms >= Math.max(a.tbt_ms, 50) * rules.tbt_ratio && b.tbt_ms - a.tbt_ms >= rules.tbt_min_ms) {
       slower.push(`Page frozen by scripts (TBT): usually ${Math.round(a.tbt_ms)} ms, now ${b.tbt_ms} ms`);
+      out.metrics.push("tbt");
     }
     if (a.cls !== null && b.cls !== null && b.cls > t.cls && b.cls - a.cls >= rules.cls_min_increase) {
       slower.push(`Layout jumping (CLS): usually ${a.cls}, now ${b.cls}`);
+      out.metrics.push("cls");
     }
     if (slower.length) {
       out.kinds.push("slower");
@@ -128,10 +146,16 @@ export function detect(now: ResultRow, base: ResultRow | undefined, t: Threshold
   // Older saved results have no script list; never treat everything as "new" against them.
   if (base.scripts && now.scripts) {
     const before = new Set(base.scripts.hosts);
-    out.newHosts = now.scripts.hosts.filter((h) => !before.has(h));
+    const newScripts = now.scripts.hosts.filter((h) => !before.has(h));
+    // Embedded frames are compared only once earlier results recorded them too.
+    const framesBefore = base.scripts.frames ? new Set(base.scripts.frames) : null;
+    const newFrames = framesBefore && now.scripts.frames ? now.scripts.frames.filter((h) => !framesBefore.has(h) && !before.has(h)) : [];
+    out.newHosts = [...new Set([...newScripts, ...newFrames])];
     if (out.newHosts.length) {
       out.kinds.push("new-script");
-      out.changes.push(`New script source: ${out.newHosts.slice(0, 3).join(", ")}${out.newHosts.length > 3 ? ` (+${out.newHosts.length - 3})` : ""}`);
+      const list = (xs: string[]) => `${xs.slice(0, 3).join(", ")}${xs.length > 3 ? ` (+${xs.length - 3})` : ""}`;
+      if (newScripts.length) out.changes.push(`New script source: ${list(newScripts)}`);
+      if (newFrames.length) out.changes.push(`New embed (calendar, video, chat…): ${list(newFrames)}`);
     }
   }
 
@@ -148,14 +172,16 @@ export function detect(now: ResultRow, base: ResultRow | undefined, t: Threshold
  */
 export function confirm(all: Detection[], report: Detection): Detection {
   const kinds = all[0].kinds.filter((k) => all.every((d) => d.kinds.includes(k)));
-  if (!kinds.length) return { kinds: [], changes: [], newHosts: [] };
+  if (!kinds.length) return { ...EMPTY };
   const newHosts = all[0].newHosts.filter((h) => all.every((d) => d.newHosts.includes(h)));
+  const metrics = all[0].metrics.filter((m) => all.every((d) => d.metrics.includes(m)));
+  const isNew = (c: string) => c.startsWith("New script") || c.startsWith("New embed");
   const changes = report.changes.filter((c) =>
-    (c.startsWith("New script") && kinds.includes("new-script")) ||
+    (isNew(c) && kinds.includes("new-script")) ||
     (c.startsWith("Usually passes") && kinds.includes("now-failing")) ||
-    (!c.startsWith("New script") && !c.startsWith("Usually passes") && kinds.includes("slower")),
+    (!isNew(c) && !c.startsWith("Usually passes") && kinds.includes("slower")),
   );
-  return { kinds, changes, newHosts };
+  return { kinds, changes, newHosts, metrics };
 }
 
 // The breakdown comes from the real page load, while the headline number is a simulated
@@ -181,7 +207,7 @@ function shortUrl(u: string): string {
 export function explainCauses(now: ResultRow, prev: ResultRow | undefined, d: Detection): string[] {
   const causes: string[] = [];
   const h = now.hints;
-  if (d.newHosts.length) causes.push(`A new script is loading from ${d.newHosts.slice(0, 2).join(" and ")}`);
+  if (d.newHosts.length) causes.push(`Something new is loading from ${d.newHosts.slice(0, 2).join(" and ")}`);
 
   const nowEl = h?.lcp_element;
   const prevEl = prev?.hints?.lcp_element;
@@ -243,6 +269,7 @@ export function buildAlertMessage(alerts: Alert[], dateLabel: string, runDates: 
       : `${n}. ${first.site} ${path}`);
     for (const c of first.changes) lines.push(`   ${c}`);
     for (const c of first.causes) lines.push(`   Likely cause: ${c}`);
+    for (const p of first.playbook ?? []) lines.push(`   ${p}`);
     lines.push(`   Compared with: its usual result (last tests up to ${runDates[first.prevRunId] ?? first.prevRunId})`);
   }
   if (groups.size > max) lines.push("", `+${groups.size - max} more in today's results file.`);

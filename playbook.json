@@ -1,0 +1,220 @@
+{
+  "_about": "SitePulse Fix Playbook (Edi, Nov 4 2026): fixes made on GoElite sites Jun to Oct 2026. Each fix has signals SitePulse can see in Google's results. When an alert matches, the alert names the past fix. 'avoid' entries are things that were tried and did not work: SitePulse mentions them so nobody repeats them. Edit this file to add fixes; no code change needed. No fixes have been made on cptdog.com or day1cpt.org yet (Nov 2026). Host names match their subdomains too (usemessages.com matches js-na2.usemessages.com). 'new_hosts_any' means the script or embed must be NEW on the page, i.e. a deferral stopped working.",
+  "fixes": [
+    {
+      "id": "hidden-calendar",
+      "title": "Hidden booking calendar loading for nobody",
+      "past": "D1CU, Oct 1–2: hidden #booking pop-up with the Meetings calendar loaded on all 342 pages (about 0.9 s of script each)",
+      "fix": "Replace the Meetings embed with an empty placeholder (.meetings-lazy with data-src) and build it only when the pop-up opens, keeping the visitor's tracking ID",
+      "result": "With the chat, video and banner changes, D1CU homepage mobile blocking time 1,830 → about 975 ms",
+      "watch_out": "The Global modals editor showed 'No Modal yet' while the pop-up was live; publishing there goes to every page at once",
+      "signals": {
+        "new_hosts_any": [
+          "meetings.hubspot.com"
+        ]
+      },
+      "site_notes": {
+        "GE": "Lazy-loading Meetings on goelite.com did not work in July (MeetingsEmbedCode.js reads the containers before later scripts can act; embeds sit in a Global Content partial on about 677 pages). Needs a Melody and Dean decision before trying again."
+      }
+    },
+    {
+      "id": "chat-on-load",
+      "title": "Live chat loading on page open (the deferral may have stopped working)",
+      "past": "goelite.com (July), D1CU and D1CC (Oct 1)",
+      "fix": "Set window.hsConversationsSettings = { loadImmediately: false } and start the chat on the first scroll, click, key press or tap (Site header HTML on goelite.com; child theme _base.html on D1CU/D1CC)",
+      "result": "D1CC mobile blocking time 490 → about 390 ms with this change alone",
+      "watch_out": "The config line must come before the loader. Check with HubSpotConversations.widget.status(), not by fetching the page (fetched copies were cached)",
+      "signals": {
+        "new_hosts_any": [
+          "usemessages.com"
+        ]
+      }
+    },
+    {
+      "id": "youtube-embed",
+      "title": "Video embed loading on page open",
+      "past": "D1CU homepage, Oct",
+      "fix": "Add loading=\"lazy\" to the YouTube iframe so it loads when someone scrolls to it",
+      "result": "Part of the combined D1CU Oct 2 result",
+      "signals": {
+        "new_hosts_any": [
+          "youtube.com",
+          "youtube-nocookie.com"
+        ]
+      }
+    },
+    {
+      "id": "forms-recaptcha",
+      "title": "Forms and reCAPTCHA loading for every visitor (the deferral may have stopped working)",
+      "past": "VeteranDegrees, Sept–Oct: reCAPTCHA from the theme's global forms was the biggest cost on all 45 priority pages",
+      "fix": "Load forms and reCAPTCHA only when a visitor scrolls to a form, opens the pop-up or reaches comments; keep landing pages loading forms straight away (Act3 - VD2026/child.js, tested behind ?vd_defer=1)",
+      "result": "Desktop blocking time: BAH 1,126 → 218 ms, Yellow Ribbon 1,099 → 301 ms, CalVet 1,132 → 506 ms",
+      "watch_out": "The landing-page check relies on {{ builtin_body_classes }} on <body>. Dean's checks (forms, conversions, Pixel) need repeating after any change",
+      "signals": {
+        "new_hosts_any": [
+          "hsforms.net",
+          "gstatic.com",
+          "recaptcha.net"
+        ]
+      }
+    },
+    {
+      "id": "late-background-banner",
+      "title": "Main banner (CSS background) found late",
+      "past": "D1CU homepage and school pages (July–Oct), D1CC homepage (Oct 2)",
+      "fix": "Per-page preload in Settings → Advanced options → Head HTML: <link rel=\"preload\" as=\"image\" href=\"EXACT-URL\" fetchpriority=\"high\"> (split mobile/desktop images with media if needed)",
+      "result": "D1CU homepage mobile banner 15.1 → about 3.1 s; D1CU Westcliff score 31 → 63; D1CC banner discovery delay 3,260 → 80 ms",
+      "watch_out": "The URL must match the CSS exactly, including encoding (%28 is not '('). If the banner is swapped the preload silently points at a dead file. Preloading doesn't make a heavy file lighter (298 KB and 650 KB banners still need WebP)",
+      "signals": {
+        "phase": "resourceLoadDelay",
+        "lcp_snippet_any": [
+          "background-image",
+          "section-bg__media"
+        ],
+        "metrics_any": [
+          "lcp"
+        ]
+      }
+    },
+    {
+      "id": "late-lcp-image",
+      "title": "Main image (img tag) found late or at normal priority",
+      "past": "goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo",
+      "fix": "Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority=\"high\" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery)",
+      "result": "goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix)",
+      "watch_out": "The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June)",
+      "signals": {
+        "phase": "resourceLoadDelay",
+        "lcp_snippet_any": [
+          "<img",
+          "<svg"
+        ],
+        "metrics_any": [
+          "lcp"
+        ]
+      }
+    },
+    {
+      "id": "heavy-banner",
+      "title": "Main banner file too heavy",
+      "past": "D1CU banners (Oct): the 138 KB banner was fixed fully by a preload; the 298 KB and 650 KB banners were not",
+      "fix": "Make the banner file smaller (convert to WebP or compress); a preload alone doesn't make a heavy file lighter",
+      "watch_out": "Keep any Head HTML preload pointing at the new file name",
+      "signals": {
+        "phase": "resourceLoadDuration",
+        "lcp_snippet_any": [
+          "background-image",
+          "section-bg__media"
+        ],
+        "metrics_any": [
+          "lcp"
+        ]
+      }
+    },
+    {
+      "id": "oversized-images",
+      "title": "Oversized image files",
+      "past": "goelite.com school listing and detail templates, D1CC /universities, Recent Events cards (July)",
+      "fix": "Wrap image URLs in HubSpot's resize_image_url (add srcset where the module allows) so a smaller copy is served",
+      "result": "D1CC /universities score 56 → 96 (with a banner preload); D1CC Westcliff 71 → 93",
+      "watch_out": "Check every loop in a module: the first Recent Events attempt fixed only one of two",
+      "signals": {
+        "phase": "resourceLoadDuration",
+        "metrics_any": [
+          "lcp"
+        ]
+      }
+    },
+    {
+      "id": "layout-shift",
+      "title": "Layout jumping because space isn't reserved",
+      "past": "goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards",
+      "fix": "Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box)",
+      "result": "Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0",
+      "watch_out": "Edit module.css, never the generated .min.css",
+      "signals": {
+        "metrics_any": [
+          "cls"
+        ]
+      }
+    }
+  ],
+  "avoid": [
+    {
+      "title": "Delaying marketing trackers by about 3 s",
+      "sites": [
+        "D1CU",
+        "D1CC"
+      ],
+      "why": "Christine decided in Oct to keep trackers as they are",
+      "signals": {
+        "metrics_any": [
+          "tbt"
+        ],
+        "top_third_party_any": [
+          "Facebook",
+          "Google Ads",
+          "Google/Doubleclick Ads",
+          "reddit",
+          "Clarity",
+          "Google Tag Manager"
+        ]
+      }
+    },
+    {
+      "title": "Delaying the enquiry form",
+      "sites": [
+        "D1CU"
+      ],
+      "why": "No measurable difference in Oct, so undone",
+      "signals": {
+        "hosts_any": [
+          "hsforms.net"
+        ],
+        "metrics_any": [
+          "tbt"
+        ]
+      }
+    }
+  ],
+  "known_issues": [
+    {
+      "site": "GE",
+      "path": ".*",
+      "title": "Orphaned blog-meeting pop-up still loads on every page (no button opens it)",
+      "signals": {
+        "frames_any": [
+          "meetings.hubspot.com"
+        ]
+      }
+    },
+    {
+      "site": "GE",
+      "path": "Westcliff|westcliff",
+      "title": "About 5,000 ms blocking time on Westcliff, mostly HubSpot's own jQuery (can't be removed)"
+    },
+    {
+      "site": "VD",
+      "path": "^/schools/",
+      "title": "Very slow VD school pages (Curry College 29.9 s, Monroe 27.1 s, CIAM 22.0 s); follow-on Request"
+    },
+    {
+      "site": "*",
+      "path": ".*",
+      "title": "Marketing trackers (Facebook, Google Ads, Reddit, Clarity, HubSpot analytics) cause most remaining mobile blocking time and large run-to-run swings",
+      "signals": {
+        "metrics_any": [
+          "tbt"
+        ],
+        "top_third_party_any": [
+          "Facebook",
+          "Google Ads",
+          "Google/Doubleclick Ads",
+          "reddit",
+          "Clarity",
+          "Google Tag Manager"
+        ]
+      }
+    }
+  ]
+}

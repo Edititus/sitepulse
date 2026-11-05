@@ -87,7 +87,7 @@ test("causes are plain English, most specific first, and don't quote mismatched 
   const b = base(row({ lcp: 3100, hosts: ["d.com"] }), row({ lcp: 3100, hosts: ["d.com"] }));
   const now = row({ lcp: 6400, hosts: ["d.com", "calendly.com"] });
   const causes = explainCauses(now, b, detect(now, b, t));
-  assert.equal(causes[0], "A new script is loading from calendly.com");
+  assert.equal(causes[0], "Something new is loading from calendly.com");
   assert.equal(causes[1], 'Most of the wait (90%) is the main element ("Hero") being ready but not shown yet, usually because scripts or styles block it');
   assert.equal(causes[2], "Biggest blocking file: d.com/…/main.css");
 });
@@ -95,7 +95,7 @@ test("causes are plain English, most specific first, and don't quote mismatched 
 test("a new-script-only alert doesn't add unrelated loading causes", () => {
   const b = base(row({ hosts: ["d.com"] }), row({ hosts: ["d.com"] }));
   const now = row({ hosts: ["d.com", "calendly.com"] });
-  assert.deepEqual(explainCauses(now, b, detect(now, b, t)), ["A new script is loading from calendly.com"]);
+  assert.deepEqual(explainCauses(now, b, detect(now, b, t)), ["Something new is loading from calendly.com"]);
 });
 
 test("alert message groups pages from the same template", () => {

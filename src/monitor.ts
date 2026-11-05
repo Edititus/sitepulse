@@ -25,6 +25,7 @@ import {
 } from "./alerts.ts";
 import { buildWeekly, latestIncludingErrors } from "./weekly.ts";
 import { minutesThisMonth } from "./github.ts";
+import { loadPlaybook, playbookLines } from "./playbook.ts";
 
 const { values: args } = parseArgs({
   options: {
@@ -137,6 +138,7 @@ await runPool(jobs, async (job) => {
 const RUNS_DIR = "data/runs";
 const rules: AlertRules = { ...DEFAULT_RULES, ...(config.alerts ?? {}) };
 const history = recentByPage(runFiles(RUNS_DIR, started, 30, runId), rules.history_size);
+const playbook = loadPlaybook("playbook.json");
 const baselines = new Map<string, ResultRow>();
 const suspects: Array<{ index: number; first: Detection; jump: number }> = [];
 rows.forEach((row, index) => {
@@ -169,7 +171,7 @@ await runPool(toRetest, async ({ index, first }) => {
   const best = tests.reduce((x, y) => ((y.lab?.lcp_ms ?? Infinity) < (x.lab?.lcp_ms ?? Infinity) ? y : x));
   const result = extra.length === 2
     ? confirm(tests.map((r) => detect(r, base, config.thresholds, rules)), detect(best, base, config.thresholds, rules))
-    : { kinds: [], changes: [], newHosts: [] };
+    : { kinds: [], changes: [], newHosts: [], metrics: [] };
   // Save the fastest of the tests as today's result, so a fluke never becomes part of the baseline.
   rows[index] = { ...best, retested: true, ...(result.kinds.length ? { alert: result.kinds } : {}) };
   if (!result.kinds.length) {
@@ -184,6 +186,7 @@ await runPool(toRetest, async ({ index, first }) => {
     changes: result.changes,
     causes: explainCauses(best, base, result),
     prevRunId: base.run_id,
+    playbook: playbookLines(playbook, best, result),
   });
 });
 alerts.sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));
