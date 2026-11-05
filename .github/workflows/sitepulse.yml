@@ -38,6 +38,10 @@ concurrency:
 
 jobs:
   check:
+    # Scheduled runs only happen when the repository variable SITEPULSE_SCHEDULE is "on"
+    # (Settings → Secrets and variables → Actions → Variables). Manual runs always work.
+    # A skipped scheduled run uses no GitHub minutes and no Google tests.
+    if: github.event_name != 'schedule' || vars.SITEPULSE_SCHEDULE == 'on'
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
