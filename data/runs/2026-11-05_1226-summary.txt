@@ -1,0 +1,99 @@
+SitePulse daily check: 5 Nov 2026 (mobile, lab test)
+Tested 839 pages on 6 sites in 57 min. 36 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+⚠ 11 pages got worse since last check (see the alert message).
+
+GE: 468 tested · 1% pass · median score 60 · median LCP 5.8 s · 5 errors
+ORG: 79 tested · 0% pass · median score 37 · median LCP 6.6 s
+D1CU: 121 tested · 0% pass · median score 55 · median LCP 5.4 s · 26 errors
+D1CC: 53 tested · 0% pass · median score 52 · median LCP 6.6 s · 4 errors
+DOG: 75 tested · 0% pass · median score 39 · median LCP 9.9 s · 1 error
+VD: 43 tested · 5% pass · median score 60 · median LCP 3.9 s
+
+Slowest pages (time until main content shows):
+1. ORG /day-1-cpt-universities-by-on-site-frequency: 45.1 s (score 34)
+2. GE /westcliff-application: 37.0 s (score 12)
+3. GE /blogs: 36.5 s (score 33)
+4. D1CU /home: 31.1 s (score 42)
+5. ORG /rate: 28.0 s (score 26)
+
+Needs a look: 2 pages measured over 60 s, usually a popup or banner that appears very late: VD /7c95a9b8-9c44-471c-b920-04f5b783fd0b, VD /guides/gi-bill/california
+
+Could not be tested:
+- D1CC /ads: HTTP 500: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 500: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 500: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 500: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CU /bay-atlantic-university: Blocked by the site's security check (Google's test was shown a block page)
+- +31 more in the results file
+
+GitHub minutes used this month: about 157 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/42027168754
+
+----
+
+SitePulse alert: 11 pages got worse (5 Nov 2026, confirmed by 3 tests)
+
+1. D1CU /avila-university
+   Main content shows: usually 4.4 s, now 11.3 s
+   Likely cause: The main element changed: was "Indiana Wesleyan University", now "Trine University"
+   Likely cause: Most of the wait (78%) is the main element ("Trine University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_shifter.min.css
+   Compared with: its usual result (last tests up to 4 Nov)
+
+2. D1CU /national-louis-university/ms-organization-leadership
+   Page frozen by scripts (TBT): usually 222 ms, now 4477 ms
+   Likely cause: Most of the wait (36%) is the main image ("National Louis University") downloading, so it may be too large
+   Likely cause: Heaviest third-party script: Facebook (1361 ms of work)
+   Compared with: its usual result (last tests up to 3 Nov)
+
+3. D1CU /new-england-college
+   Main content shows: usually 4.2 s, now 10.4 s
+   Likely cause: The main element changed: was "The term “Day 1 CPT universities” generally refers to institutions that allow e…", now "New England College"
+   Likely cause: Most of the wait (71%) is the main element ("New England College") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_column-navigation.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+4. DOG /day-1-cpt-universities-usa-international-students
+   Main content shows: usually 3.1 s, now 7.4 s
+   Likely cause: Most of the wait (100%) is the main element ("▪️ Some universities allow immediate CPT") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: cptdog.com/…/template_pwr-sec-form.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+5. GE /admission-agent-database/s2-qa-is-there-a-minimum/maximum-amount-of-cpt-i-can-use-if-i-want-to-stay-eligible-for-opt-after-my-doctorate
+   Usually passes Google's targets, fails now
+   Likely cause: Most of the wait (97%) is the main element ("S2 Q&A Is there a minimum/maximum amount") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: 7052064.fs1.hubspotusercontent-na1.net/…/module_kb-search-input.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+6. GE /day-1-cpt/videos
+   Main content shows: usually 3.8 s, now 14.4 s
+   Likely cause: Most of the wait (99%) is the main element ("1. DAY 1 CPT: Transfer SEVIS Timeline an") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_form-dark.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+7. GE /universities/bay-atlantic-university/rating
+   Main content shows: usually 3.8 s, now 11.4 s
+   Likely cause: Most of the wait (41%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.js
+   Compared with: its usual result (last tests up to 3 Nov)
+
+8. GE /universities/dallas-baptist-university/rating
+   Main content shows: usually 3.9 s, now 11.3 s
+   Likely cause: Most of the wait (37%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_form.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+9. GE /universities/university-of-cumberlands/rating-form
+   Main content shows: usually 3.6 s, now 13.4 s
+   Likely cause: Most of the wait (40%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/module_course-review-form.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+10. ORG /-personalized-variant-a6b7e5a6-8ac2-468d-bec7-6a7f6bdfe810
+   Main content shows: usually 4.1 s, now 10.9 s
+   Likely cause: Most of the wait (29%) is the main image ("Clear solution guide displayed on clean ") downloading, so it may be too large
+   Compared with: its usual result (last tests up to 3 Nov)
+
++1 more in today's results file.
