@@ -1,5 +1,7 @@
 {
-  "strategies": ["mobile"],
+  "strategies": [
+    "mobile"
+  ],
   "rate_per_minute": 25,
   "concurrency": 8,
   "rotation_days": 7,
@@ -14,11 +16,15 @@
   "alerts": {
     "lcp_ratio": 2,
     "lcp_min_ms": 2500,
+    "lcp_range_ratio": 1.25,
+    "lcp_range_min_ms": 1500,
     "tbt_ratio": 4,
     "tbt_min_ms": 1500,
+    "tbt_range_ratio": 1.5,
+    "tbt_range_min_ms": 1000,
     "cls_min_increase": 0.05,
     "min_history": 2,
-    "history_size": 3,
+    "history_size": 5,
     "max_suspects": 30
   },
   "sites": [
@@ -27,7 +33,9 @@
       "name": "GoElite",
       "url": "https://goelite.com",
       "sitemap": "https://goelite.com/sitemap.xml",
-      "exclude": ["^/zh(/|$)"]
+      "exclude": [
+        "^/zh(/|$)"
+      ]
     },
     {
       "code": "ORG",

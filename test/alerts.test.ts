@@ -32,8 +32,10 @@ test("baseline is the median of recent results and needs at least 2 of them", ()
   assert.equal(base(row({ lcp: 3000 }), row({ lcp: 120_000 }), row({ lcp: 3400 })).lab!.lcp_ms, 3200, "over-60 s results are left out");
   const blockPage = row({ lcp: 800, hints: { ...row().hints!, lcp_element: { label: "You’ve been blocked for security reasons", selector: "h1", snippet: "<h1>" } } });
   assert.equal(base(row({ lcp: 6000 }), blockPage, row({ lcp: 6400 })).lab!.lcp_ms, 6200, "old block-page results are left out");
-  assert.equal(base(row({ pass: true }), row({ pass: true }), row({ pass: false })).pass, true);
-  assert.equal(base(row({ pass: true }), row({ pass: false })).pass, false);
+  assert.equal(base(row({ pass: true }), row({ pass: true }), row({ pass: true })).pass, true);
+  assert.equal(base(row({ pass: true }), row({ pass: true }), row({ pass: false })).pass, false, "flipping pages don't count as passing");
+  const r = base(row({ lcp: 3000, tbt: 200 }), row({ lcp: 9000, tbt: 900 }), row({ lcp: 3500, tbt: 300 }));
+  assert.deepEqual([r.range.lcp_ms, r.range.tbt_ms, r.samples], [9000, 900, 3]);
 });
 
 test("normal day-to-day swings never alert", () => {
@@ -48,7 +50,7 @@ test("a clearly slower page alerts", () => {
   const b = base(row({ lcp: 3100 }), row({ lcp: 3000 }), row({ lcp: 3200 }));
   const d = detect(row({ lcp: 6400 }), b, t);
   assert.deepEqual(d.kinds, ["slower"]);
-  assert.equal(d.changes[0], "Main content shows: usually 3.1 s, now 6.4 s");
+  assert.equal(d.changes[0], "Main content shows: usually 3.1 s, never above 3.2 s in its last 3 tests, now 6.4 s");
   assert.deepEqual(detect(row({ tbt: 2000 }), base(row({ tbt: 300 }), row({ tbt: 300 })), t).kinds, ["slower"]);
   assert.deepEqual(detect(row({ cls: 0.25 }), base(row({ cls: 0.02 }), row({ cls: 0.02 })), t).kinds, ["slower"]);
 });
@@ -62,8 +64,16 @@ test("a new script source alerts only if it was never seen in recent results", (
   assert.deepEqual(detect(row({ hosts: ["d.com", "x.com"] }), base(row({ hosts: ["d.com"] }), row()), t).kinds, [], "older results without a script list");
 });
 
-test("a page that usually passes and now fails alerts", () => {
+test("a page that passed every recent test and now fails alerts", () => {
   assert.deepEqual(detect(row({ pass: false }), base(row({ pass: true }), row({ pass: true })), t).kinds, ["now-failing"]);
+  assert.deepEqual(detect(row({ pass: false }), base(row({ pass: true }), row({ pass: false }), row({ pass: true })), t).kinds, [], "a page that flips doesn't");
+});
+
+test("a page that swings between a fast and a slow mode doesn't alert on a normal slow day (real Nov 5 case)", () => {
+  // D1CU /avila-university: 4.2, 4.4, 15.4, 4.4, 12.0 s over the previous days, then 11.3 s.
+  const b = buildBaseline([4201, 4351, 15365, 4351, 11956].map((lcp) => row({ lcp })))!;
+  assert.deepEqual(detect(row({ lcp: 11313 }), b, t).kinds, []);
+  assert.deepEqual(detect(row({ lcp: 21000 }), b, t).kinds, ["slower"], "far outside its range still alerts");
 });
 
 test("results over 60 s are 'needs a look', never 'slower'", () => {
@@ -80,7 +90,7 @@ test("all three tests must agree, and the fastest test's numbers are reported", 
   const slow = [row({ lcp: 9000 }), row({ lcp: 7000 }), row({ lcp: 6800 })].map((r) => detect(r, b, t));
   const confirmed = confirm(slow, slow[2]);
   assert.deepEqual(confirmed.kinds, ["slower"]);
-  assert.equal(confirmed.changes[0], "Main content shows: usually 3.1 s, now 6.8 s");
+  assert.equal(confirmed.changes[0], "Main content shows: usually 3.1 s, never above 3.1 s in its last 2 tests, now 6.8 s");
 });
 
 test("causes are plain English, most specific first, and don't quote mismatched seconds", () => {

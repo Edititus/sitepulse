@@ -21,11 +21,11 @@ import { buildMessage, passes, type ResultRow } from "./report.ts";
 import { keyOf, recentByPage, runFiles } from "./history.ts";
 import {
   DEFAULT_RULES, buildAlertMessage, buildBaseline, confirm, detect, explainCauses, templateKey,
-  type Alert, type AlertRules, type Detection,
+  type Alert, type AlertRules, type Baseline, type Detection,
 } from "./alerts.ts";
 import { buildWeekly, latestIncludingErrors } from "./weekly.ts";
 import { minutesThisMonth } from "./github.ts";
-import { loadPlaybook, playbookLines } from "./playbook.ts";
+import { applyAccepted, loadPlaybook, playbookLines } from "./playbook.ts";
 
 const { values: args } = parseArgs({
   options: {
@@ -139,7 +139,7 @@ const RUNS_DIR = "data/runs";
 const rules: AlertRules = { ...DEFAULT_RULES, ...(config.alerts ?? {}) };
 const history = recentByPage(runFiles(RUNS_DIR, started, 30, runId), rules.history_size);
 const playbook = loadPlaybook("playbook.json");
-const baselines = new Map<string, ResultRow>();
+const baselines = new Map<string, Baseline>();
 const suspects: Array<{ index: number; first: Detection; jump: number }> = [];
 rows.forEach((row, index) => {
   const base = buildBaseline(history.get(keyOf(row)), rules);
@@ -156,6 +156,7 @@ console.log(`${baselines.size} pages have enough history to compare. ${suspects.
 
 const alerts: Alert[] = [];
 let unconfirmed = suspects.length - toRetest.length;
+let accepted = 0;
 await runPool(toRetest, async ({ index, first }) => {
   const row = rows[index];
   const base = baselines.get(keyOf(row))!;
@@ -169,13 +170,16 @@ await runPool(toRetest, async ({ index, first }) => {
   }
   const tests = [row, ...extra];
   const best = tests.reduce((x, y) => ((y.lab?.lcp_ms ?? Infinity) < (x.lab?.lcp_ms ?? Infinity) ? y : x));
-  const result = extra.length === 2
+  const confirmed = extra.length === 2
     ? confirm(tests.map((r) => detect(r, base, config.thresholds, rules)), detect(best, base, config.thresholds, rules))
     : { kinds: [], changes: [], newHosts: [], metrics: [] };
+  // Limitations already reviewed and accepted don't alert unless the page changed.
+  const { detection: result, heldBack } = applyAccepted(playbook, best, confirmed);
+  if (heldBack.length && !result.kinds.length) accepted++;
   // Save the fastest of the tests as today's result, so a fluke never becomes part of the baseline.
   rows[index] = { ...best, retested: true, ...(result.kinds.length ? { alert: result.kinds } : {}) };
   if (!result.kinds.length) {
-    unconfirmed++;
+    if (!heldBack.length) unconfirmed++;
     return;
   }
   alerts.push({
@@ -190,7 +194,7 @@ await runPool(toRetest, async ({ index, first }) => {
   });
 });
 alerts.sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));
-console.log(`${alerts.length} confirmed, ${unconfirmed} not confirmed.`);
+console.log(`${alerts.length} confirmed, ${unconfirmed} not confirmed, ${accepted} held back as accepted limitations.`);
 
 // 4. Save results (committed back to the repo by the workflow).
 mkdirSync(RUNS_DIR, { recursive: true });
@@ -217,7 +221,8 @@ const message = buildMessage({
   thresholds: config.thresholds,
   alertCount: alerts.length,
   unconfirmed,
-  monthMinutes: await minutesThisMonth(started),
+  accepted,
+  monthMinutes: await minutesThisMonth(started, process.env.GITHUB_RUN_ID, Date.now() - started.getTime()),
 });
 const alertMessage = buildAlertMessage(alerts, dateLabel, runDates);
 const isMondayInLagos = lagosDate(started, { weekday: "long" }) === "Monday";

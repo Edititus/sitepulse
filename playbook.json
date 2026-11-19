@@ -1,5 +1,5 @@
 {
-  "_about": "SitePulse Fix Playbook (Edi, Nov 4 2026): fixes made on GoElite sites Jun to Oct 2026. Each fix has signals SitePulse can see in Google's results. When an alert matches, the alert names the past fix. 'avoid' entries are things that were tried and did not work: SitePulse mentions them so nobody repeats them. Edit this file to add fixes; no code change needed. No fixes have been made on cptdog.com or day1cpt.org yet (Nov 2026). Host names match their subdomains too (usemessages.com matches js-na2.usemessages.com). 'new_hosts_any' means the script or embed must be NEW on the page, i.e. a deferral stopped working.",
+  "_about": "SitePulse Fix Playbook (Edi, Nov 4 2026): fixes made on GoElite sites Jun to Oct 2026. Each fix has signals SitePulse can see in Google's results. When an alert matches, the alert names the past fix. 'avoid' entries are things that were tried and did not work: SitePulse mentions them so nobody repeats them. Edit this file to add fixes; no code change needed. No fixes have been made on cptdog.com or day1cpt.org yet (Nov 2026). Host names match their subdomains too (usemessages.com matches js-na2.usemessages.com). 'new_hosts_any' means the script or embed must be NEW on the page, i.e. a deferral stopped working. 'accepted' entries are limitations already reviewed and accepted: SitePulse doesn't alert on those numbers for those pages unless the page changes (a new script or embed appears) or the number goes above 'max_ms' when one is set.",
   "fixes": [
     {
       "id": "hidden-calendar",
@@ -215,6 +215,32 @@
           "Google Tag Manager"
         ]
       }
+    }
+  ],
+  "accepted": [
+    {
+      "site": "D1CU",
+      "path": ".*",
+      "metrics": [
+        "tbt"
+      ],
+      "reason": "Marketing trackers stay as they are (Christine, Oct 2026)"
+    },
+    {
+      "site": "D1CC",
+      "path": ".*",
+      "metrics": [
+        "tbt"
+      ],
+      "reason": "Marketing trackers stay as they are (Christine, Oct 2026)"
+    },
+    {
+      "site": "GE",
+      "path": "[Ww]estcliff",
+      "metrics": [
+        "tbt"
+      ],
+      "reason": "About 5,000 ms of blocking time, mostly HubSpot's own jQuery, which can't be removed"
     }
   ]
 }

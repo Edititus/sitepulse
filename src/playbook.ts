@@ -31,7 +31,16 @@ export interface Fix {
   site_notes?: Record<string, string>;
 }
 
+export interface Accepted {
+  site: string; // site code, or "*" for all sites
+  path: string; // regex on the URL path
+  metrics: Metric[]; // which numbers are accepted as they are
+  reason: string;
+  max_ms?: number; // optional: alert again above this level
+}
+
 export interface Playbook {
+  accepted?: Accepted[];
   fixes: Fix[];
   avoid: Array<{ title: string; sites?: string[]; why: string; signals?: Signals }>;
   known_issues: Array<{ site: string; path: string; title: string; signals?: Signals }>;
@@ -40,7 +49,7 @@ export interface Playbook {
 export function loadPlaybook(path = "playbook.json"): Playbook | null {
   if (!existsSync(path)) return null;
   const p = JSON.parse(readFileSync(path, "utf8")) as Playbook;
-  return { fixes: p.fixes ?? [], avoid: p.avoid ?? [], known_issues: p.known_issues ?? [] };
+  return { accepted: p.accepted ?? [], fixes: p.fixes ?? [], avoid: p.avoid ?? [], known_issues: p.known_issues ?? [] };
 }
 
 /** The biggest part of the main-content delay, e.g. "resourceLoadDelay". */
@@ -123,4 +132,36 @@ export function playbookLines(pb: Playbook | null, row: ResultRow, d: Detection)
   );
   if (known) lines.push(`Known issue: ${known.title}.`);
   return lines.slice(0, 4);
+}
+
+const METRIC_OF_CHANGE: Array<[string, Metric]> = [
+  ["Main content", "lcp"],
+  ["Page frozen", "tbt"],
+  ["Layout jumping", "cls"],
+];
+
+/**
+ * Drop alerts about numbers that were already reviewed and accepted for this page,
+ * unless the page itself changed (a new script or embed) or the number passed the accepted level.
+ * Returns the detection to alert on (possibly empty) and the reasons that held anything back.
+ */
+export function applyAccepted(pb: Playbook | null, row: ResultRow, d: Detection): { detection: Detection; heldBack: string[] } {
+  const entries = (pb?.accepted ?? []).filter(
+    (a) => (a.site === "*" || a.site === row.site) && new RegExp(a.path).test(new URL(row.url).pathname),
+  );
+  if (!entries.length || d.kinds.includes("new-script")) return { detection: d, heldBack: [] };
+  const value: Record<Metric, number | null | undefined> = { lcp: row.lab?.lcp_ms, tbt: row.lab?.tbt_ms, cls: row.lab?.cls };
+  const heldBack: string[] = [];
+  const keep = d.metrics.filter((m) => {
+    const hit = entries.find((a) => a.metrics.includes(m) && !(a.max_ms !== undefined && (value[m] ?? 0) > a.max_ms));
+    if (hit) heldBack.push(hit.reason);
+    return !hit;
+  });
+  if (keep.length === d.metrics.length) return { detection: d, heldBack: [] };
+  const changes = d.changes.filter((c) => {
+    const m = METRIC_OF_CHANGE.find(([prefix]) => c.startsWith(prefix))?.[1];
+    return !m || keep.includes(m);
+  });
+  const kinds = d.kinds.filter((k) => k !== "slower" || keep.length > 0);
+  return { detection: { ...d, kinds, changes, metrics: keep }, heldBack: [...new Set(heldBack)] };
 }

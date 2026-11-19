@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hostMatches, loadPlaybook, playbookLines } from "../src/playbook.ts";
+import { applyAccepted, hostMatches, loadPlaybook, playbookLines } from "../src/playbook.ts";
 import { summarize } from "../src/psi.ts";
 import type { Detection } from "../src/alerts.ts";
 import type { ResultRow } from "../src/report.ts";
@@ -86,4 +86,19 @@ test("banner fixes only match when load time got worse, not script freezing", ()
   assert.match(playbookLines(pb, r, d(["lcp"]))[0] ?? "", /Main banner/);
   assert.ok(!playbookLines(pb, r, d(["tbt"])).some((l) => /Main banner/.test(l)));
   assert.match(playbookLines(pb, r, { kinds: ["now-failing"], changes: [], newHosts: [], metrics: [] })[0] ?? "", /Main banner/);
+});
+
+test("accepted limitations don't alert unless the page changed or the accepted level is passed", () => {
+  const tbtOnly: Detection = { kinds: ["slower"], changes: ["Page frozen by scripts (TBT): usually 300 ms, never above 900 ms in its last 5 tests, now 2500 ms"], newHosts: [], metrics: ["tbt"] };
+  const held = applyAccepted(pb, row("D1CU", "/"), tbtOnly);
+  assert.deepEqual(held.detection.kinds, []);
+  assert.match(held.heldBack[0], /Marketing trackers stay as they are/);
+  const both: Detection = { ...tbtOnly, changes: ["Main content shows: usually 3.0 s, never above 3.2 s in its last 5 tests, now 9.0 s", ...tbtOnly.changes], metrics: ["lcp", "tbt"] };
+  const partial = applyAccepted(pb, row("D1CU", "/"), both).detection;
+  assert.deepEqual([partial.kinds, partial.metrics, partial.changes.length], [["slower"], ["lcp"], 1], "load time still alerts");
+  const changed: Detection = { ...tbtOnly, kinds: ["slower", "new-script"], newHosts: ["x.com"] };
+  assert.deepEqual(applyAccepted(pb, row("D1CU", "/"), changed).detection.kinds, ["slower", "new-script"], "a page change always alerts");
+  assert.deepEqual(applyAccepted(pb, row("ORG", "/"), tbtOnly).detection.kinds, ["slower"], "other sites are not covered");
+  const capped = applyAccepted({ ...pb, accepted: [{ site: "D1CU", path: ".*", metrics: ["tbt"], reason: "r", max_ms: 2000 }] }, row("D1CU", "/", { lab: { ...row("D1CU", "/").lab!, tbt_ms: 2500 } }), tbtOnly);
+  assert.deepEqual(capped.detection.kinds, ["slower"], "above the accepted level alerts again");
 });

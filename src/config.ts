@@ -22,8 +22,12 @@ export interface Thresholds {
 export interface AlertSettings {
   lcp_ratio?: number;
   lcp_min_ms?: number;
+  lcp_range_ratio?: number;
+  lcp_range_min_ms?: number;
   tbt_ratio?: number;
   tbt_min_ms?: number;
+  tbt_range_ratio?: number;
+  tbt_range_min_ms?: number;
   cls_min_increase?: number;
   min_history?: number;
   history_size?: number;

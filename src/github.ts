@@ -3,7 +3,16 @@
 
 type Fetch = typeof fetch;
 
-export async function minutesThisMonth(now = new Date(), fetcher: Fetch = fetch): Promise<number | null> {
+/**
+ * Finished runs this month come from GitHub; the run in progress is left out of that list
+ * (its timing isn't final yet) and counted from its own elapsed time instead.
+ */
+export async function minutesThisMonth(
+  now = new Date(),
+  currentRunId?: string,
+  currentElapsedMs = 0,
+  fetcher: Fetch = fetch,
+): Promise<number | null> {
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPOSITORY;
   const api = process.env.GITHUB_API_URL || "https://api.github.com";
@@ -20,13 +29,15 @@ export async function minutesThisMonth(now = new Date(), fetcher: Fetch = fetch)
       const body: any = await res.json();
       const runs: any[] = body.workflow_runs ?? [];
       for (const r of runs) {
+        if (currentRunId && String(r.id) === String(currentRunId)) continue;
+        if (r.status !== "completed" || r.conclusion === "skipped") continue;
         const start = Date.parse(r.run_started_at ?? r.created_at);
-        const end = r.status === "completed" ? Date.parse(r.updated_at) : now.getTime();
+        const end = Date.parse(r.updated_at);
         if (Number.isFinite(start) && Number.isFinite(end) && end > start) total += Math.ceil((end - start) / 60_000);
       }
       if (runs.length < 100) break;
     }
-    return total;
+    return total + Math.ceil(currentElapsedMs / 60_000);
   } catch {
     return null;
   }

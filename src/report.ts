@@ -71,6 +71,7 @@ export interface MessageInput {
   thresholds: Thresholds;
   alertCount?: number; // confirmed alerts (sent as a separate message)
   unconfirmed?: number; // looked worse once but the second test disagreed
+  accepted?: number; // got worse only on numbers already accepted for that page
   monthMinutes?: number | null; // GitHub Actions minutes used this month
 }
 
@@ -89,7 +90,8 @@ export function buildMessage(m: MessageInput): string {
   if (m.alertCount !== undefined) {
     lines.push(m.alertCount
       ? `⚠ ${plural(m.alertCount, "page got", "pages got")} worse since last check (see the alert message).`
-      : "No page got worse than its usual result." + (m.unconfirmed ? ` (${m.unconfirmed} looked worse at first, but the retests were fine.)` : ""));
+      : "No page went outside its normal range." + (m.unconfirmed ? ` (${m.unconfirmed} looked worse at first, but the retests were fine.)` : ""));
+    if (m.accepted) lines.push(`${plural(m.accepted, "page", "pages")} got worse only on limitations already accepted (no alert sent).`);
   }
   lines.push("");
   for (const s of stats) {

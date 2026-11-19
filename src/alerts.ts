@@ -3,10 +3,12 @@
 // Plain English: almost every page already misses Google's targets, and Google's
 // lab test swings a lot from day to day on the same page (1 test in 10 comes out
 // more than twice as slow as the day before, with nothing changed). So:
-//   - each page is compared with its own *usual* result: the median of its last 3 results
-//   - a page needs at least 2 earlier results before it can alert
-//   - only big changes count: main content 2x and 2.5 s+ slower, script freeze 4x and 1.5 s+,
-//     layout jumps up by 0.05+, a script from a new source, or a page that usually passes now fails
+//   - each page is compared with its own last 5 results (it needs at least 2 before it can alert)
+//   - many pages swing between a fast and a slow mode, so "slower" means outside the page's
+//     normal range: above the slowest of its recent results by 25% and 1.5 s+ (script freeze:
+//     50% and 1 s+), and at least twice its usual (median) result
+//   - also: layout jumps up by 0.05+, a script or embed from a new source, or a page that
+//     passed every recent test now failing
 //   - every suspect is tested twice more, and only alerts if all three tests agree
 // Results over 60 s are treated as "needs a look", not as alerts.
 
@@ -20,10 +22,14 @@ export type AlertKind = "slower" | "new-script" | "now-failing";
 export const SUSPICIOUS_LCP_MS = 60_000;
 
 export interface AlertRules {
-  lcp_ratio: number;
+  lcp_ratio: number; // vs the usual (median) result
   lcp_min_ms: number;
+  lcp_range_ratio: number; // vs the slowest recent result
+  lcp_range_min_ms: number;
   tbt_ratio: number;
   tbt_min_ms: number;
+  tbt_range_ratio: number;
+  tbt_range_min_ms: number;
   cls_min_increase: number;
   min_history: number; // earlier results needed before a page can alert
   history_size: number; // how many earlier results form the baseline
@@ -32,11 +38,15 @@ export interface AlertRules {
 export const DEFAULT_RULES: AlertRules = {
   lcp_ratio: 2,
   lcp_min_ms: 2500,
+  lcp_range_ratio: 1.25,
+  lcp_range_min_ms: 1500,
   tbt_ratio: 4,
   tbt_min_ms: 1500,
+  tbt_range_ratio: 1.5,
+  tbt_range_min_ms: 1000,
   cls_min_increase: 0.05,
   min_history: 2,
-  history_size: 3,
+  history_size: 5,
 };
 
 export type Metric = "lcp" | "tbt" | "cls";
@@ -80,7 +90,15 @@ function median(values: Array<number | null | undefined>): number | null {
  * "passes" if most earlier results passed, and every script source seen before.
  * Returns undefined when there isn't enough history yet.
  */
-export function buildBaseline(prevs: ResultRow[] | undefined, rules: AlertRules = DEFAULT_RULES): ResultRow | undefined {
+/** A page's usual result plus its normal range (the slowest of its recent results). */
+export type Baseline = ResultRow & { range: { lcp_ms: number | null; tbt_ms: number | null; cls: number | null }; samples: number };
+
+function maxOf(values: Array<number | null | undefined>): number | null {
+  const v = values.filter((x): x is number => typeof x === "number");
+  return v.length ? Math.max(...v) : null;
+}
+
+export function buildBaseline(prevs: ResultRow[] | undefined, rules: AlertRules = DEFAULT_RULES): Baseline | undefined {
   // Results saved before block-page detection existed are filtered here too.
   const usable = (prevs ?? [])
     .filter((r) => !r.error && r.lab && r.hints && !isSuspicious(r) && !isBlockPage(r as PageSummary))
@@ -99,7 +117,14 @@ export function buildBaseline(prevs: ResultRow[] | undefined, rules: AlertRules 
   return {
     ...last,
     lab,
-    pass: usable.filter((r) => r.pass === true).length * 2 > usable.length,
+    range: {
+      lcp_ms: maxOf(usable.map((r) => r.lab!.lcp_ms)),
+      tbt_ms: maxOf(usable.map((r) => r.lab!.tbt_ms)),
+      cls: maxOf(usable.map((r) => r.lab!.cls)),
+    },
+    samples: usable.length,
+    // "Passes" only if it passed every recent test; pages that flip between pass and fail don't count.
+    pass: usable.every((r) => r.pass === true),
     // Scripts (and embedded frames) are compared only when every earlier result recorded them.
     ...(withScripts.length === usable.length
       ? {
@@ -117,7 +142,7 @@ export function buildBaseline(prevs: ResultRow[] | undefined, rules: AlertRules 
 }
 
 /** Compare a page's result with its usual (baseline) result. */
-export function detect(now: ResultRow, base: ResultRow | undefined, t: Thresholds, rules: AlertRules = DEFAULT_RULES): Detection {
+export function detect(now: ResultRow, base: Baseline | undefined, t: Thresholds, rules: AlertRules = DEFAULT_RULES): Detection {
   const out: Detection = { kinds: [], changes: [], newHosts: [], metrics: [] };
   if (!base || now.error || !now.lab || !base.lab) return out;
   const a = base.lab;
@@ -125,16 +150,26 @@ export function detect(now: ResultRow, base: ResultRow | undefined, t: Threshold
 
   if (!isSuspicious(now)) {
     const slower: string[] = [];
-    if (a.lcp_ms !== null && b.lcp_ms !== null && b.lcp_ms >= a.lcp_ms * rules.lcp_ratio && b.lcp_ms - a.lcp_ms >= rules.lcp_min_ms) {
-      slower.push(`Main content shows: usually ${secs(a.lcp_ms)}, now ${secs(b.lcp_ms)}`);
+    const r = base.range;
+    const n = base.samples;
+    if (
+      a.lcp_ms !== null && b.lcp_ms !== null && r.lcp_ms !== null &&
+      b.lcp_ms >= a.lcp_ms * rules.lcp_ratio && b.lcp_ms - a.lcp_ms >= rules.lcp_min_ms &&
+      b.lcp_ms >= r.lcp_ms * rules.lcp_range_ratio && b.lcp_ms - r.lcp_ms >= rules.lcp_range_min_ms
+    ) {
+      slower.push(`Main content shows: usually ${secs(a.lcp_ms)}, never above ${secs(r.lcp_ms)} in its last ${n} tests, now ${secs(b.lcp_ms)}`);
       out.metrics.push("lcp");
     }
-    if (a.tbt_ms !== null && b.tbt_ms !== null && b.tbt_ms >= Math.max(a.tbt_ms, 50) * rules.tbt_ratio && b.tbt_ms - a.tbt_ms >= rules.tbt_min_ms) {
-      slower.push(`Page frozen by scripts (TBT): usually ${Math.round(a.tbt_ms)} ms, now ${b.tbt_ms} ms`);
+    if (
+      a.tbt_ms !== null && b.tbt_ms !== null && r.tbt_ms !== null &&
+      b.tbt_ms >= Math.max(a.tbt_ms, 50) * rules.tbt_ratio && b.tbt_ms - a.tbt_ms >= rules.tbt_min_ms &&
+      b.tbt_ms >= r.tbt_ms * rules.tbt_range_ratio && b.tbt_ms - r.tbt_ms >= rules.tbt_range_min_ms
+    ) {
+      slower.push(`Page frozen by scripts (TBT): usually ${Math.round(a.tbt_ms)} ms, never above ${r.tbt_ms} ms in its last ${n} tests, now ${b.tbt_ms} ms`);
       out.metrics.push("tbt");
     }
-    if (a.cls !== null && b.cls !== null && b.cls > t.cls && b.cls - a.cls >= rules.cls_min_increase) {
-      slower.push(`Layout jumping (CLS): usually ${a.cls}, now ${b.cls}`);
+    if (a.cls !== null && b.cls !== null && r.cls !== null && b.cls > t.cls && b.cls - r.cls >= rules.cls_min_increase) {
+      slower.push(`Layout jumping (CLS): usually ${a.cls}, never above ${r.cls} in its last ${n} tests, now ${b.cls}`);
       out.metrics.push("cls");
     }
     if (slower.length) {
@@ -161,7 +196,7 @@ export function detect(now: ResultRow, base: ResultRow | undefined, t: Threshold
 
   if (base.pass === true && now.pass === false) {
     out.kinds.push("now-failing");
-    out.changes.push("Usually passes Google's targets, fails now");
+    out.changes.push(`Passed Google's targets in all of its last ${base.samples} tests, fails now`);
   }
   return out;
 }
@@ -178,8 +213,8 @@ export function confirm(all: Detection[], report: Detection): Detection {
   const isNew = (c: string) => c.startsWith("New script") || c.startsWith("New embed");
   const changes = report.changes.filter((c) =>
     (isNew(c) && kinds.includes("new-script")) ||
-    (c.startsWith("Usually passes") && kinds.includes("now-failing")) ||
-    (!isNew(c) && !c.startsWith("Usually passes") && kinds.includes("slower")),
+    (c.startsWith("Passed Google") && kinds.includes("now-failing")) ||
+    (!isNew(c) && !c.startsWith("Passed Google") && kinds.includes("slower")),
   );
   return { kinds, changes, newHosts, metrics };
 }
