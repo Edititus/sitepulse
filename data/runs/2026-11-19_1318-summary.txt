@@ -1,0 +1,92 @@
+SitePulse daily check: 19 Nov 2026 (mobile, lab test)
+Tested 888 pages on 6 sites in 54 min. 9 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+⚠ 8 pages got worse since last check (see the alert message).
+1 page got worse only on limitations already accepted (no alert sent).
+
+GE: 471 tested · 1% pass · median score 56 · median LCP 6.7 s · 5 errors
+ORG: 84 tested · 0% pass · median score 39 · median LCP 5.5 s
+D1CU: 150 tested · 0% pass · median score 47 · median LCP 12.4 s
+D1CC: 55 tested · 0% pass · median score 50 · median LCP 8.5 s · 4 errors
+DOG: 83 tested · 0% pass · median score 41 · median LCP 9.5 s
+VD: 45 tested · 7% pass · median score 63 · median LCP 3.3 s
+
+Slowest pages (time until main content shows):
+1. GE /blogs: 46.2 s (score 30)
+2. ORG /day-1-cpt-universities-by-on-site-frequency: 40.5 s (score 35)
+3. VD /guides/gi-bill: 34.0 s (score 51)
+4. ORG /rate: 32.9 s (score 27)
+5. ORG /cheapest-day-1-cpt-universities: 32.9 s (score 37)
+
+Needs a look: 2 pages measured over 60 s, usually a popup or banner that appears very late: VD /guides/gi-bill/california, VD /schools/monroe-university
+
+Could not be tested:
+- D1CC /ads: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/aua: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- +4 more in the results file
+
+GitHub minutes used this month: about 269 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/44532046045
+
+----
+
+SitePulse alert: 8 pages got worse (19 Nov 2026, confirmed by 3 tests)
+
+1. D1CU /harrisburg-university-of-science-and-technology/msisem
+   Main content shows: usually 4.3 s, never above 4.4 s in its last 2 tests, now 11.7 s
+   Likely cause: Most of the wait (86%) is the main element ("Harrisburg University Building") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_nav.min.css
+   Compared with: its usual result (last tests up to 3 Nov)
+
+2. D1CU /saint-peters-university
+   Main content shows: usually 3.6 s, never above 3.8 s in its last 5 tests, now 11.7 s
+   Likely cause: Most of the wait (82%) is the main element ("Saint Peter's University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: static-assets.searchatlas.com/…/dynamic_optimization.js
+   Compared with: its usual result (last tests up to 5 Nov)
+
+3. DOG /day-1-cpt-universities/twu
+   Page frozen by scripts (TBT): usually 728 ms, never above 910 ms in its last 2 tests, now 3225 ms
+   Likely cause: Most of the wait (99%) is the main element ("Tennessee Wesleyan University (TWU) is a") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: cptdog.com/…/template_pwr-sec-form.min.css
+   Likely cause: Heaviest third-party script: Facebook (931 ms of work)
+   Compared with: its usual result (last tests up to 5 Nov)
+
+4. DOG /opt
+   Page frozen by scripts (TBT): usually 723 ms, never above 1350 ms in its last 5 tests, now 5353 ms
+   Likely cause: The main element changed: was "2026 F-1 Rule Update: DHS published a final rule that would replace Duration of…", now "CPTDog_OPT"
+   Likely cause: Most of the wait (77%) is the main element ("CPTDog_OPT") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: cptdog.com/…/template_main.min.css
+   Compared with: its usual result (last tests up to 5 Nov)
+
+5. GE /admission-agent-database/i-am-on-h-4-/-l-2-/-j-1-can-i-do-this
+   Main content shows: usually 5.5 s, never above 6.9 s in its last 5 tests, now 12.4 s
+   Likely cause: Most of the wait (87%) is the main element ("goelite") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: 7052064.fs1.hubspotusercontent-na1.net/…/module_kb_breadcrumbs.min.css
+   Compared with: its usual result (last tests up to 5 Nov)
+
+6. GE /partners/corporate-partners/yami
+   Main content shows: usually 3.1 s, never above 4.3 s in its last 5 tests, now 20.0 s
+   Likely cause: Most of the wait (100%) is the main element ("If your employer referred you here, it’s") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.css
+   Known issue: Orphaned blog-meeting pop-up still loads on every page (no button opens it).
+   Compared with: its usual result (last tests up to 5 Nov)
+
+7. GE /universities/avila-university/rating
+   Main content shows: usually 3.9 s, never above 4.1 s in its last 5 tests, now 14.0 s
+   Likely cause: Most of the wait (39%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 5 Nov)
+
+8. GE /universities/university-of-cumberlands/rating
+   Main content shows: usually 3.9 s, never above 4.7 s in its last 5 tests, now 14.4 s
+   Likely cause: Most of the wait (39%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.js
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 5 Nov)
