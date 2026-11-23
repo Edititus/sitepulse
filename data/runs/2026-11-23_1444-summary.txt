@@ -1,0 +1,150 @@
+SitePulse daily check: 23 Nov 2026 (mobile, lab test)
+Tested 863 pages on 6 sites in 54 min. 10 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+⚠ 16 pages got worse since last check (see the alert message).
+
+GE: 456 tested · 0% pass · median score 57 · median LCP 7.1 s · 5 errors
+ORG: 74 tested · 0% pass · median score 32 · median LCP 5.8 s
+D1CU: 139 tested · 0% pass · median score 51 · median LCP 7.9 s · 1 error
+D1CC: 51 tested · 0% pass · median score 50 · median LCP 7.9 s · 4 errors
+DOG: 92 tested · 0% pass · median score 32 · median LCP 12.4 s
+VD: 51 tested · 8% pass · median score 68 · median LCP 4.4 s
+
+Slowest pages (time until main content shows):
+1. ORG /day-1-cpt-universities-by-on-site-frequency: 51.5 s (score 29)
+2. GE /westcliff-application: 40.7 s (score 23)
+3. GE /blogs: 33.9 s (score 33)
+4. ORG /top-15-day-1-cpt-universities: 33.1 s (score 24)
+5. ORG /rate: 31.0 s (score 24)
+
+Needs a look: 2 pages measured over 60 s, usually a popup or banner that appears very late: VD /guides/gi-bill/california, VD /schools/bay-atlantic-university
+
+Could not be tested:
+- D1CC /ads: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CU /events/hass-2025: TimeoutError
+- +5 more in the results file
+
+GitHub minutes used this month: about 471 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/45197440379
+
+----
+
+SitePulse alert: 16 pages got worse (23 Nov 2026, confirmed by 3 tests)
+
+1. D1CU /benedictine-university/ms-health-informatics
+   Main content shows: usually 4.4 s, never above 4.5 s in its last 5 tests, now 10.9 s
+   Likely cause: Most of the wait (71%) is the main element ("Benedictine University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_rich-text.min.css
+   Compared with: its usual result (last tests up to 22 Nov)
+
+2. D1CU /events/niw-diy-25
+   Layout jumping (CLS): usually 0.0095, never above 0.019 in its last 2 tests, now 0.154
+   Likely cause: The main element changed: was "Day 1 CPT Universities", now "2-May-15-2025-08-40-39-9148-PM"
+   Likely cause: Most of the wait (29%) is the main element ("2-May-15-2025-08-40-39-9148-PM") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_nav.min.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 5 Nov)
+
+3. DOG template /blogs/*: 2 pages (e.g. /blogs/how-to-choose-the-right-day-1-cpt-universities)
+   Layout jumping (CLS): usually 0, never above 0 in its last 2 tests, now 0.154
+   Likely cause: Most of the wait (92%) is the main element ("choosing the right school is important") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: cptdog.com/…/template_pwr-author.min.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 2 Nov)
+
+4. DOG template /day-1-cpt-universities/*: 3 pages (e.g. /day-1-cpt-universities/california)
+   Layout jumping (CLS): usually 0, never above 0 in its last 2 tests, now 0.154
+   Likely cause: Most of the wait (29%) is the main image ("Best Day 1 CPT Universities in the West
+") downloading, so it may be too large
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 3 Nov)
+
+5. GE /admission-agent-database/s3-qa-i-applied-on-the-schools-website-without-your-link-or-with-a-different-email-can-you-still-help
+   Passed Google's targets in all of its last 2 tests, fails now
+   Likely cause: Most of the wait (97%) is the main element ("S3 Q&A: I applied on the school's websit") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: 7052064.fs1.hubspotusercontent-na1.net/…/module_kb_accordion_menu.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Known issue: Marketing trackers (Facebook, Google Ads, Reddit, Clarity, HubSpot analytics) cause most remaining mobile blocking time and large run-to-run swings.
+   Compared with: its usual result (last tests up to 22 Nov)
+
+6. GE /partners/corporate-partners/fantuan
+   Main content shows: usually 3.1 s, never above 4.8 s in its last 5 tests, now 8.5 s
+   Likely cause: Most of the wait (100%) is the main element ("If your employer referred you here, it’s") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.css
+   Known issue: Orphaned blog-meeting pop-up still loads on every page (no button opens it).
+   Compared with: its usual result (last tests up to 22 Nov)
+
+7. GE /universities/goldey-beacom-college/rating
+   Main content shows: usually 4.1 s, never above 4.4 s in its last 5 tests, now 14.4 s
+   Likely cause: Most of the wait (33%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 22 Nov)
+
+8. GE /universities/international-technological-university/rating
+   Main content shows: usually 4.0 s, never above 4.1 s in its last 5 tests, now 9.0 s
+   Likely cause: Most of the wait (95%) is the main image ("Referral") starting to download late, so it may be lazy-loaded or not preloaded
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 22 Nov)
+
+9. GE /universities/north-carolina-wesleyan-university/rating
+   Main content shows: usually 4.0 s, never above 5.7 s in its last 5 tests, now 13.0 s
+   Likely cause: Most of the wait (89%) is the main image ("Referral") starting to download late, so it may be lazy-loaded or not preloaded
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 22 Nov)
+
+10. ORG template /day-1-cpt-universities/*: 2 pages (e.g. /day-1-cpt-universities/anderson-university)
+   Layout jumping (CLS): usually 0.08, never above 0.08 in its last 2 tests, now 0.233
+   Likely cause: Most of the wait (99%) is the main element ("🔖 Hybrid Professional Master's Programs") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cpt.org/…/template_tabs.min.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 19 Nov)
+
++2 more in today's results file.
+
+----
+
+SitePulse weekly report: week to 23 Nov 2026
+2562 pages tested this week · 2% pass Google's targets.
+
+Slowest 10 pages (time until main content shows):
+1. ORG /day-1-cpt-universities-by-on-site-frequency: 51.5 s (score 29)
+2. GE /westcliff-application: 40.7 s (score 23)
+3. GE /blogs/dol-september-2026-perm-pwd-processing-times: 38.5 s (score 33)
+4. GE /blogs/pressure-mounts-trump-recalibrate-immigration-crac...: 35.3 s (score 32)
+5. GE /blogs/meta-plans-deep-cuts-to-metaverse-shifts-toward-ai: 35.1 s (score 35)
+6. GE /blogs/meta-to-buy-manus-ai-startup-for-over-2-billion: 34.4 s (score 34)
+7. GE /blogs: 33.9 s (score 33)
+8. ORG /top-15-day-1-cpt-universities: 33.1 s (score 24)
+9. VD /guides/veteran-disability-ratings: 31.8 s (score 61)
+10. ORG /rate: 31.0 s (score 24)
+
+Needs a look: 4 pages measured over 60 s, usually a popup or banner that appears very late:
+- VD /schools/westcliff-university: 139.1 s (late element: "VeteranDegrees Logo")
+- VD /guides/gi-bill/california: 83.2 s (late element: "skyscrapers-palm-trees-beverly-hills")
+- VD /schools/bay-atlantic-university: 82.4 s (late element: "Bay Atlantic University campus entrance, Washingto")
+- ORG /news/7-alternative-paths-if-h1b-lottery-not-selected: 65.0 s (late element: "American flag draped with wooden letters spelling ")
+
+Could not be tested (26):
+- D1CC /ads: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/aua: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/ben: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/curry: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/ou: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/portal: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/gbc: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
