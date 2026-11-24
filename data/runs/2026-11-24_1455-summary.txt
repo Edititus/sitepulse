@@ -1,0 +1,103 @@
+SitePulse daily check: 24 Nov 2026 (mobile, lab test)
+Tested 892 pages on 6 sites in 54 min. 9 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+⚠ 21 pages got worse since last check (see the alert message).
+
+GE: 461 tested · 1% pass · median score 55 · median LCP 6.5 s · 5 errors
+ORG: 85 tested · 0% pass · median score 33 · median LCP 5.7 s
+D1CU: 147 tested · 0% pass · median score 48 · median LCP 10.7 s
+D1CC: 46 tested · 0% pass · median score 51 · median LCP 9.8 s · 4 errors
+DOG: 99 tested · 0% pass · median score 32 · median LCP 11.7 s
+VD: 54 tested · 8% pass · median score 68 · median LCP 2.8 s
+
+Slowest pages (time until main content shows):
+1. ORG /day-1-cpt-universities-by-on-site-frequency: 59.6 s (score 35)
+2. GE /blogs: 37.9 s (score 32)
+3. ORG /cheapest-day-1-cpt-universities: 36.0 s (score 34)
+4. VD /guides/va-approved-schools: 32.5 s (score 47)
+5. VD /guides/veteran-disability-ratings: 31.2 s (score 53)
+
+Needs a look: 1 page measured over 60 s, usually a popup or banner that appears very late: VD /guides/gi-bill/california
+
+Could not be tested:
+- D1CC /ads: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/au: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- +4 more in the results file
+
+GitHub minutes used this month: about 525 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/45419456319
+
+----
+
+SitePulse alert: 21 pages got worse (24 Nov 2026, confirmed by 3 tests)
+
+1. D1CC /universities/lamar-university
+   Main content shows: usually 1.8 s, never above 7.3 s in its last 3 tests, now 12.1 s
+   Likely cause: Most of the wait (91%) is the main element ("D1CC Logo Version 2") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cpt.com/…/module_school-selection.min.css
+   Compared with: its usual result (last tests up to 20 Nov)
+
+2. D1CU /anderson-university
+   Main content shows: usually 4.4 s, never above 10.7 s in its last 5 tests, now 13.8 s
+   Likely cause: Most of the wait (84%) is the main element ("Trine University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_header-04.min.css
+   Compared with: its usual result (last tests up to 23 Nov)
+
+3. D1CU /benedictine-university
+   Main content shows: usually 5.0 s, never above 8.3 s in its last 5 tests, now 14.2 s
+   Likely cause: Most of the wait (88%) is the main element ("Benedictine University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/module_Location_Finder.min.css
+   Compared with: its usual result (last tests up to 23 Nov)
+
+4. D1CU /benedictine-university/ms-health-informatics
+   Main content shows: usually 4.5 s, never above 10.9 s in its last 5 tests, now 14.6 s
+   Likely cause: Most of the wait (90%) is the main element ("Benedictine University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/template_mobile-nav.min.css
+   Compared with: its usual result (last tests up to 23 Nov)
+
+5. D1CU /events/ncwu-spring25
+   Layout jumping (CLS): usually 0.006, never above 0.006 in its last 2 tests, now 0.154
+   Likely cause: Most of the wait (81%) is the main image ("NCWU 120324 Flyer 2") starting to download late, so it may be lazy-loaded or not preloaded
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 3 Nov)
+
+6. D1CU /monroe-university
+   Main content shows: usually 4.1 s, never above 4.2 s in its last 5 tests, now 13.9 s
+   Likely cause: Most of the wait (74%) is the main element ("Monroe College") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/module_icon.min.css
+   Compared with: its usual result (last tests up to 23 Nov)
+
+7. D1CU /ottawa-university
+   Main content shows: usually 3.9 s, never above 7.2 s in its last 5 tests, now 12.4 s
+   Likely cause: Most of the wait (71%) is the main element ("Ottawa University") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/module_Location_Finder.min.css
+   Compared with: its usual result (last tests up to 23 Nov)
+
+8. DOG /2026-day-1-cpt-programs/national-louis-university
+   Layout jumping (CLS): usually 0.034, never above 0.06 in its last 3 tests, now 0.154
+   Likely cause: Most of the wait (49%) is the main image ("National Louis University campus") starting to download late, so it may be lazy-loaded or not preloaded
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 19 Nov)
+
+9. DOG template /blogs/*: 3 pages (e.g. /blogs/is-a-second-masters-still-the-best-option-for-you)
+   Layout jumping (CLS): usually 0.0155, never above 0.031 in its last 2 tests, now 0.154
+   Likely cause: Most of the wait (89%) is the main element ("a student thinking if he should pursue a") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: cptdog.com/…/template_pwr-avatar.min.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 5 Nov)
+
+10. DOG template /events/*: 2 pages (e.g. /events/harrisburg-fall24)
+   Layout jumping (CLS): usually 0.034, never above 0.034 in its last 2 tests, now 0.165
+   Likely cause: Most of the wait (64%) is the main image ("Harrisburg University Webinar 91924") starting to download late, so it may be lazy-loaded or not preloaded
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Compared with: its usual result (last tests up to 22 Nov)
+
++7 more in today's results file.
