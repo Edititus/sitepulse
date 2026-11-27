@@ -1,0 +1,113 @@
+SitePulse daily check: 27 Nov 2026 (mobile, lab test)
+Tested 873 pages on 6 sites in 52 min. 9 could not be tested.
+Pass = LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+⚠ 11 pages got worse since last check (see the alert message).
+
+GE: 461 tested · 1% pass · median score 56 · median LCP 6.9 s · 5 errors
+ORG: 90 tested · 0% pass · median score 40 · median LCP 5.2 s
+D1CU: 149 tested · 0% pass · median score 51 · median LCP 7.7 s
+D1CC: 42 tested · 0% pass · median score 57 · median LCP 9.6 s · 4 errors
+DOG: 79 tested · 0% pass · median score 43 · median LCP 10.8 s
+VD: 52 tested · 6% pass · median score 65 · median LCP 3.8 s
+
+Slowest pages (time until main content shows):
+1. ORG /news/7-alternative-paths-if-h1b-lottery-not-selected: 58.9 s (score 48)
+2. ORG /day-1-cpt-universities-by-on-site-frequency: 48.5 s (score 52)
+3. GE /blogs: 43.9 s (score 33)
+4. ORG /top-15-day-1-cpt-universities: 35.9 s (score 40)
+5. ORG /cheapest-day-1-cpt-universities: 35.9 s (score 43)
+
+Needs a look: 2 pages measured over 60 s, usually a popup or banner that appears very late: VD /guides/gi-bill/california, VD /schools/bay-atlantic-university
+
+Could not be tested:
+- D1CC /ads: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-day1cpt-comprehensive: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-phd: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- D1CC /ads-westcliff: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- GE /ai-school-data/gbc: HTTP 400: Lighthouse returned error: NO_FCP. The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)
+- +4 more in the results file
+
+GitHub minutes used this month: about 687 of 2,000 free.
+
+Full results: https://github.com/Edititus/sitepulse/actions/runs/46011382984
+
+----
+
+SitePulse alert: 11 pages got worse (27 Nov 2026, confirmed by 3 tests)
+
+1. D1CU /monroe-university/ds-certificate
+   Main content shows: usually 3.9 s, never above 4.1 s in its last 5 tests, now 13.2 s
+   Likely cause: Most of the wait (75%) is the main element ("Monroe College") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: day1cptuniversities.com/…/module_icon.min.css
+   Compared with: its usual result (last tests up to 25 Nov)
+
+2. GE /onsite
+   Main content shows: usually 2.0 s, never above 2.0 s in its last 5 tests, now 14.9 s
+   Likely cause: Most of the wait (100%) is the main element ("Meet Us at NEC
+") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/module_icon.min.css
+   Known issue: Orphaned blog-meeting pop-up still loads on every page (no button opens it).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+3. GE /partners/law-firms
+   Main content shows: usually 3.6 s, never above 6.4 s in its last 5 tests, now 14.5 s
+   Likely cause: Most of the wait (99%) is the main element ("By partnering with GoElite, your firm ca") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_main.min.css
+   Known issue: Orphaned blog-meeting pop-up still loads on every page (no button opens it).
+   Compared with: its usual result (last tests up to 24 Nov)
+
+4. GE /registration/error
+   Page frozen by scripts (TBT): usually 2739 ms, never above 3700 ms in its last 5 tests, now 11497 ms
+   Likely cause: Most of the wait (99%) is the main element ("If you forget your password, please use ") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_child.min.css
+   Likely cause: Heaviest third-party script: hsappstatic.net (6854 ms of work)
+   Known issue: Orphaned blog-meeting pop-up still loads on every page (no button opens it).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+5. GE /universities/national-louis-university/rating
+   Main content shows: usually 4.2 s, never above 6.8 s in its last 5 tests, now 15.0 s
+   Likely cause: Most of the wait (38%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_main.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+6. GE /universities/texas-wesleyan-university/rating
+   Main content shows: usually 4.0 s, never above 4.0 s in its last 5 tests, now 16.1 s
+   Likely cause: Most of the wait (38%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_form.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+7. GE template /universities/trine-university/*: 2 pages (e.g. /universities/trine-university/rating)
+   Main content shows: usually 4.1 s, never above 4.2 s in its last 5 tests, now 15.4 s
+   Likely cause: Most of the wait (38%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_form.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+8. GE /universities/university-of-cumberlands/rating
+   Main content shows: usually 4.1 s, never above 4.6 s in its last 5 tests, now 14.7 s
+   Likely cause: Most of the wait (39%) is the main element ("Referral") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: goelite.com/…/template_form.min.css
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+9. ORG /northeast-day-1-cpt-universities
+   Main content shows: usually 4.2 s, never above 4.5 s in its last 5 tests, now 8.4 s
+   Likely cause: Most of the wait (27%) is the main image ("day 1 cpt universities northeast map") downloading, so it may be too large
+   Similar past fix: Main image (img tag) found late or at normal priority (goelite.com (July): homepage hero, /universities hero, school-page gallery, header logo). What worked: Preload it in the head (with imagesrcset/imagesizes for responsive images), or give the first image fetchpriority="high" and lazy-load the rest (gallery module clone in Act3 - COS/modules/gallery). Result: goelite.com homepage score 28 → 42; /universities 31 → 62 (with the filter-bar fix).
+   Watch out: The URL must be updated by hand if the image changes. On the goelite.com homepage the logo preload is in Head HTML lines 4–5, below the hero preload, and its comment wrongly says 'hero', so check the right line when either image is swapped. A script that adds fetchpriority after load had no effect (June).
+   Compared with: its usual result (last tests up to 26 Nov)
+
+10. VD /posts/gi-bill-one-class-rule
+   Passed Google's targets in all of its last 2 tests, fails now
+   Likely cause: Most of the wait (100%) is the main element ("GI Bill® One-Class Rule: How One In-Pers") being ready but not shown yet, usually because scripts or styles block it
+   Likely cause: Biggest blocking file: veterandegrees.com/…/template_one-field-form-v4.min.css
+   Similar past fix: Layout jumping because space isn't reserved (goelite.com (June–July): gallery slider, /universities filter bar, intro icons, Recent Events cards). What worked: Reserve the element's space in CSS before it loads (min-height, aspect-ratio with width: 100%, or a fixed icon box). Result: Gallery slider CLS 0.261 → about 0; filter bar 0.0266 → 0.
+   Watch out: Edit module.css, never the generated .min.css.
+   Known issue: Marketing trackers (Facebook, Google Ads, Reddit, Clarity, HubSpot analytics) cause most remaining mobile blocking time and large run-to-run swings.
+   Compared with: its usual result (last tests up to 20 Nov)
